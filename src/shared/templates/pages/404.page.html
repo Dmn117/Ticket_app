@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ticket Application</title>
+    <link rel="icon" type="image/x-icon" href="{{FAVICON}}">
+
+    <style>
+        html {
+            font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            background-image: url('{{BG}}');
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: cover;
+        }
+
+        main {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            row-gap: 2rem;
+            height: 30rem;
+            width: 30rem;
+            background: rgba(255,255,255,0.01);
+            -webkit-backdrop-filter: blur(29px);
+            backdrop-filter: blur(29px);
+            border: 1px solid rgba(255,255,255,0.025);
+            border-radius: 10px;
+        }
+
+        footer {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 5rem;
+        }
+
+        h1, h2, h3 {
+            margin: 0;
+            padding: 0;
+            color: white;
+        }
+
+        h3 span {
+            font-weight: 900;
+        }
+
+        .container-header {
+            margin-top: 3rem;
+        }
+
+        .container-footer {
+            margin-bottom: 3rem;
+        }
+
+        a {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 1rem;
+            color: #fff;
+            background-color: #0000005d;
+            text-decoration: none;
+            border: none;
+            border-radius: 8px;
+            transition: background-color 0.3s ease;
+        }
+
+        a:hover {
+            background: #000000be;
+        }
+        
+    </style>
+</head>
+<body>
+    <main>
+        <div class="container">
+            <div class="container-header">
+                <h1>404 Not Found</h1>
+            </div>
+            <div class="container-main">
+                <h3>Could not find path: <span>{{URL}}</span></h3>
+                <br>
+                <h3>Please, check the URL and try again</h3>
+            </div>
+            <div class="container-footer">
+                <a href="/api-docs">API Documentation</a>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <h3>&copy; 2025 Whatever. All rights reserved.</h3>
+    </footer>
+</body>
+</html>

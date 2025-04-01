@@ -1,0 +1,1127 @@
+openapi: 3.0.0
+info: 
+  title: Ticket Application
+  version: 1.0.0
+  contact: 
+    name: API Support
+    email: juanromerojohn.117@gmail.com
+
+    
+servers: 
+  - url: /api/v1
+
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+
+    PermissionGroup: 
+      type: object
+      properties:
+        _id: 
+          type: string
+        profile: 
+          type: string
+        enabled: 
+          type: boolean
+        permissions:
+          type: array
+          items: 
+            type: object
+            properties:
+              segment: 
+                type: string
+              permissions:
+                type: array
+                items:  
+                  type: string
+        example:
+          _id: 67101248014d3b5f26a712f1
+          profile: ADMIN
+          enabled: true
+          permissions:
+            - segment: USER
+              permissions:
+                - FIND
+                - CREATE
+                - UPDATE
+            - segment: PERMISSION_GROUPS
+              permissions:
+                - FIND
+                - CREATE
+                - UPDATE
+
+    User:
+      type: object
+      properties:
+        _id: 
+          type: string
+        firstName: 
+          type: string
+        lastName: 
+          type: string
+        email: 
+          type: string
+        role: 
+          type: string
+        validated: 
+          type: boolean
+        enabled: 
+          type: boolean
+        avatar: 
+          type: string
+        boss: 
+          type: string
+        permissions:
+          type: array
+          items:  
+            $ref: '#/components/schemas/PermissionGroup'
+        cretedAt: 
+          type: Date
+        updatedAt: 
+          type: Date
+      example:
+        _id: 671012480a4d3b5a26c712f3
+        firstName: Joe
+        lastName: Doe
+        email: joedoe@example.com
+        role: AGENT
+        validated: false
+        enabled: true
+        avatar: 67101248014d3b5f26a712f1
+        boss: 6710124c014d3baf26a882f2
+        permissions:
+          _id: 67101248014d3b5f26a712f1
+          profile: ADMIN
+          enabled: true
+          permissions:
+            - segment: USER
+              permissions:
+                - FIND
+                - CREATE
+                - UPDATE
+            - segment: PERMISSION_GROUPS
+              permissions:
+                - FIND
+                - CREATE
+                - UPDATE
+        createdAt: 2024-10-16T20:30:00.501+00:00
+        updatedAt: 2024-10-16T20:30:00.501+00:00
+
+    File: 
+      type: object
+      properties:
+        _id:
+          type: string
+        path:
+          type: string
+        owner: 
+          type: string
+        createdAt:
+          type: Date
+        updatedAt:
+          type: Date
+      example:
+        _id: 6670786607b3ed45bd4405c7
+        path: 'uploads\folder\6670786607b3ed45bd4405c.type'
+        owner: 671012480a4d3b5a26c712f3
+        createdAt: 2024-05-22T15:01:03.978Z
+        updatedAt: 2024-05-30T16:38:39.620Z
+        
+
+
+security:
+  - BearerAuth: []
+
+
+paths: 
+
+  /user/get/all:
+    get:
+      summary: Retrieve Users by query parameters
+      tags: 
+        - User
+      parameters:
+        - name: firstName
+          in: query
+          required: false
+          description: User First Name
+          schema: 
+            type: string
+        - name: lastName
+          in: query
+          required: false
+          description: User Last Name
+          schema: 
+            type: string
+        - name: email
+          in: query
+          required: false
+          description: User Email
+          schema: 
+            type: string
+        - name: includesRoles
+          in: query
+          required: false
+          description: Whether to include or exclude roles in the search
+          schema: 
+            type: boolean
+        - name: role
+          in: query
+          required: false
+          description: User Role
+          schema: 
+            type: string
+        - name: validated
+          in: query
+          required: false
+          description: If Users are validated
+          schema: 
+            type: boolean
+        - name: enabled
+          in: query
+          required: false
+          description: Retrieve only enabled or disabled
+          schema:
+            type: boolean
+        - name: boss
+          in: query
+          required: false
+          description: User Boss Id
+          schema: 
+            type: string
+      responses: 
+        200: 
+          content: 
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  message: 
+                    type: string
+                    example: 'Usuarios recuperados exitosamente'
+                  users:
+                    type: array
+                    items: 
+                      $ref: '#/components/schemas/User'
+  
+  /user/get/id/{id}: 
+    get: 
+      summary: Retrieve User by ID
+      tags: 
+        - User
+      parameters: 
+        - name: id
+          in: path
+          required: true
+          description: User record id in the DB
+          schema: 
+            type: string
+      responses: 
+        200: 
+          content: 
+            application/json: 
+              schema: 
+                type: object
+                properties:
+                  message: 
+                    type: string
+                    example: 'Usuario recuperado exitosamente'
+                  user:
+                    $ref: '#/components/schemas/User'
+
+  /user/login:
+    post: 
+      summary: Login User and Generate Access Token
+      tags: 
+        - User
+      requestBody:
+        required: true
+        content:
+          application/json: 
+            schema: 
+              type: object
+              properties:
+                email: 
+                  type: string
+                password: 
+                  type: string
+              example: 
+                email: joedoe@example.com
+                password: '12345678'
+      responses: 
+        200: 
+          content: 
+            application/json: 
+              schema: 
+                type: object
+                properties:
+                  message: 
+                    type: string
+                    example: 'Usuario inicio sesion exitosamente'
+                  user: 
+                    $ref: '#/components/schemas/User'
+                  token:
+                    type: string
+                    example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c'
+
+  /user/create:
+    post: 
+      summary: Create a new User Record in the DB
+      tags: 
+        - User
+      requestBody:
+        required: true
+        content:
+          application/json: 
+            schema:
+              type: object
+              properties:
+                firstName: 
+                  type: string
+                lastName: 
+                  type: string
+                email: 
+                  type: string
+                password:
+                  type: string
+                role: 
+                  type: string
+                avatar: 
+                  type: string
+                boss: 
+                  type: string
+                permissions:
+                  type: array
+                  items:  
+                    $ref: '#/components/schemas/PermissionGroup'
+              example:
+                firstName: Joe
+                lastName: Doe
+                email: joedoe@example.com
+                password: '12345678'
+                role: AGENT
+                avatar: 67101248014d3b5f26a712f1
+                boss: 6710124c014d3baf26a882f2
+                permissions:
+                  profile: ADMIN
+                  permissions:
+                    - segment: USER
+                      permissions:
+                        - FIND
+                        - CREATE
+                        - UPDATE
+                    - segment: PERMISSION_GROUPS
+                      permissions:
+                        - FIND
+                        - CREATE
+                        - UPDATE
+                permissions?: 67101248014d3b5f26a712f1
+                permissions??: ADMIN
+      responses:
+        201: 
+          content: 
+            application/json: 
+              schema: 
+                type: object
+                properties:
+                  message: 
+                    type: string
+                    example: 'Usuario registrado exitosamente'
+                  user: 
+                    $ref: '#/components/schemas/User'
+
+  /user/create-in-bulk:
+    post: 
+      summary: Create Users in bulk in the DB
+      tags: 
+        - User
+      requestBody:
+        required: true
+        content:
+          application/json: 
+            schema:
+              type: array
+              items:
+                schema:
+                  type: object
+                  properties:
+                    firstName: 
+                      type: string
+                    lastName: 
+                      type: string
+                    email: 
+                      type: string
+                    password:
+                      type: string
+                    role: 
+                      type: string
+                    avatar: 
+                      type: string
+                    boss: 
+                      type: string
+                    permissions:
+                      type: array
+                      items:  
+                        $ref: '#/components/schemas/PermissionGroup'
+              example:
+                - firstName: Joe
+                  lastName: Doe
+                  email: joedoe@example.com
+                  password: '12345678'
+                  role: AGENT
+                  avatar: 67101248014d3b5f26a712f1
+                  boss: 6710124c014d3baf26a882f2
+                  permissions:
+                    profile: ADMIN
+                    permissions:
+                      - segment: USER
+                        permissions:
+                          - FIND
+                          - CREATE
+                          - UPDATE
+                      - segment: PERMISSION_GROUPS
+                        permissions:
+                          - FIND
+                          - CREATE
+                          - UPDATE
+                  permissions?: 67101248014d3b5f26a712f1
+                  permissions??: ADMIN
+      responses:
+        201: 
+          content: 
+            application/json: 
+              schema: 
+                type: object
+                properties:
+                  message: 
+                    type: string
+                    example: 'Usuarios registrados'
+                  user: 
+                    $ref: '#/components/schemas/User'
+  
+  /user/send/verification-code/{email}:
+    post:
+      summary: Send verification code by Email
+      tags:
+        - User
+      parameters: 
+        - name: email
+          in: path
+          required: true
+          description: User's Email
+          schema: 
+            type: string
+      responses:
+        200:
+          content: 
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  message: 
+                    type: string
+                    example: 'Codigo de verificacion solicitado'
+                  response:
+                    $ref: '#/components/schemas/EmailResponse'
+
+  /user/validate/verification-code/{id}:
+    post:
+      summary: Validate User verification code
+      tags:
+        - User
+      parameters: 
+        - name: id
+          in: path
+          required: true
+          description: User record id in the DB
+          schema: 
+            type: string
+      requestBody:
+        required: true
+        content: 
+          application/json:
+            schema:
+              type: object
+              properties:
+                verificationCode:
+                  type: string
+                  example: 'ABC123'
+      responses:
+        200:
+          content: 
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  message: 
+                    type: string
+                    example: 'Codigo de verificacion validado exitosamente'
+                  status:
+                    type: boolean
+                    example: true
+
+  /user/update/{id}:
+    put: 
+      summary: Update User by Id
+      tags:
+        - User
+      parameters: 
+        - name: id
+          in: path
+          required: true
+          description: User record id in the DB
+          schema: 
+            type: string
+      requestBody:
+        required: true
+        content: 
+          application/json:
+            schema: 
+              type: object
+              properties:
+                firstName: 
+                  type: string
+                lastName: 
+                  type: string
+                email: 
+                  type: string
+                password:
+                  type: string
+                role: 
+                  type: string
+                avatar: 
+                  type: string
+                boss: 
+                  type: string
+                permissions:
+                  type: array
+                  items:  
+                    $ref: '#/components/schemas/PermissionGroup'
+              example:
+                firstName: Joe
+                lastName: Doe
+                email: joedoe@example.com
+                password: '12345678'
+                role: AGENT
+                avatar: 67101248014d3b5f26a712f1
+                boss: 6710124c014d3baf26a882f2
+                permissions:
+                  profile: ADMIN
+                  permissions:
+                    - segment: USER
+                      permissions:
+                        - FIND
+                        - CREATE
+                        - UPDATE
+                    - segment: PERMISSION_GROUPS
+                      permissions:
+                        - FIND
+                        - CREATE
+                        - UPDATE
+                permissions?: 67101248014d3b5f26a712f1
+                permissions??: ADMIN
+      responses: 
+        200: 
+          content: 
+            application/json: 
+              schema: 
+                type: object
+                properties:
+                  message: 
+                    type: string
+                    example: 'Usuario Actualizado exitosamente'
+                  user:
+                    $ref: '#/components/schemas/User'
+
+  /user/enable/{id}:
+    patch:
+      summary: Enable User by Id
+      tags:
+        - User
+      parameters: 
+        - name: id
+          in: path
+          required: true
+          description: User record id in the DB
+          schema: 
+            type: string
+      responses:
+        200:
+          content: 
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  message: 
+                    type: string
+                    example: 'Usuario habilitado exitosamente'
+                  user:
+                    $ref: '#/components/schemas/User'
+
+  /user/disable/{id}:
+    patch:
+      summary: Disable User by Id
+      tags:
+        - User
+      parameters: 
+        - name: id
+          in: path
+          required: true
+          description: User record id in the DB
+          schema: 
+            type: string
+      responses:
+        200:
+          content: 
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  message: 
+                    type: string
+                    example: 'Usuario deshabilitado exitosamente'
+                  user:
+                    $ref: '#/components/schemas/User'
+
+  /user/validate/user/{email}:
+    patch:
+      summary: Validate User by Email and Verification Code
+      tags:
+        - User
+      parameters: 
+        - name: email
+          in: path
+          required: true
+          description: User's Email
+          schema: 
+            type: string
+      requestBody:
+        required: true
+        content: 
+          application/json:
+            schema:
+              type: object
+              properties:
+                verificationCode:
+                  type: string
+                  example: 'ABC123'
+      responses:
+        200:
+          content: 
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  message: 
+                    type: string
+                    example: 'Usuario validado exitosamente'
+                  user:
+                    $ref: '#/components/schemas/User'
+
+  /user/recover/password/{email}:
+    patch:
+      summary: Recover User Password by Email and Verification Code
+      tags:
+        - User
+      parameters: 
+        - name: email
+          in: path
+          required: true
+          description: User's Email
+          schema: 
+            type: string
+      requestBody:
+        required: true
+        content: 
+          application/json:
+            schema:
+              type: object
+              properties:
+                verificationCode:
+                  type: string
+                  example: 'ABC123'
+                password: 
+                  type: string
+                  example: '12345678'
+      responses:
+        200:
+          content: 
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  message: 
+                    type: string
+                    example: 'Usuario validado exitosamente'
+                  user:
+                    $ref: '#/components/schemas/User'
+
+
+
+  /permission-group/get/all: 
+    get: 
+      summary: Find all or some Permission Group by Filter query
+      tags:
+        - Permission Group
+      parameters: 
+
+      responses:
+        200: 
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: 
+                    type: string  
+                    example: 'Grupos de Permisos recuperados exitosamente'
+                  permissionGroups:
+                    $ref: '#/components/schemas/PermissionGroup'
+
+  /permission-group/get/id/{id}: 
+    get:
+      summary: Find Permission Group by Id
+      tags: 
+        - Permission Group
+      parameters: 
+        - name: id
+          in: path
+          required: true
+          description: Mongo Object Id
+          schema: 
+            type: string
+      responses: 
+        200: 
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  message: 
+                    type: string  
+                    example: 'Grupo de permisos recuperado exitosamente'
+                  permissionGroup: 
+                    $ref: '#/components/schemas/PermissionGroup'
+  
+  /permission-group/create:
+    post: 
+      summary: Create a new Permission Group
+      tags: 
+        - Permission Group
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                profile: 
+                  type: string
+                permissions:
+                  type: array
+                  items: 
+                    type: object
+                    properties:
+                      segment: 
+                        type: string
+                      permissions:
+                        type: array
+                        items:  
+                          type: string
+                example:
+                  profile: ADMIN
+                  permissions:
+                    - segment: USER
+                      permissions:
+                        - FIND
+                        - CREATE
+                        - UPDATE
+                    - segment: PERMISSION_GROUPS
+                      permissions:
+                        - FIND
+                        - CREATE
+                        - UPDATE
+      responses: 
+        201: 
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  message: 
+                    type: string  
+                    example: 'Grupo de permisos registrado exitosamente'
+                  permissionGroup: 
+                    $ref: '#/components/schemas/PermissionGroup'
+
+  /permission-group/update/{id}:
+    put: 
+      summary: Update Permission Group by Id
+      tags: 
+        - Permission Group
+      parameters: 
+        - name: id
+          in: path
+          required: true
+          description: Mongo Object Id
+          schema: 
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                profile: 
+                  type: string
+                permissions:
+                  type: array
+                  items: 
+                    type: object
+                    properties:
+                      segment: 
+                        type: string
+                      permissions:
+                        type: array
+                        items:  
+                          type: string
+                example:
+                  profile: ADMIN
+                  permissions:
+                    - segment: USER
+                      permissions:
+                        - FIND
+                        - CREATE
+                        - UPDATE
+                    - segment: PERMISSION_GROUPS
+                      permissions:
+                        - FIND
+                        - CREATE
+                        - UPDATE
+      responses: 
+        200: 
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  message: 
+                    type: string  
+                    example: 'Grupo de permisos actualizado exitosamente'
+                  permissionGroup: 
+                    $ref: '#/components/schemas/PermissionGroup'
+  
+  /permission-group/enable/{id}:
+    patch: 
+      summary: Enable Permission Group by Id
+      tags: 
+        - Permission Group
+      parameters: 
+        - name: id
+          in: path
+          required: true
+          description: Mongo Object Id
+          schema: 
+            type: string
+      responses: 
+        200: 
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  message: 
+                    type: string  
+                    example: 'Grupo de permisos habilitado exitosamente'
+                  permissionGroup: 
+                    $ref: '#/components/schemas/PermissionGroup'
+  
+  /permission-group/disable/{id}:
+    patch: 
+      summary: Disable Permission Group by Id
+      tags: 
+        - Permission Group
+      parameters: 
+        - name: id
+          in: path
+          required: true
+          description: Mongo Object Id
+          schema: 
+            type: string
+      responses: 
+        200: 
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  message: 
+                    type: string  
+                    example: 'Grupo de permisos deshabilitado exitosamente'
+                  permissionGroup: 
+                    $ref: '#/components/schemas/PermissionGroup'
+
+
+  /file/get/all:
+    get: 
+      summary: Get All or some Files by Query parameters
+      tags:
+        - File
+      parameters:
+        - name: owner
+          in: query
+          description: Owner User ID (ObjectId of DB)
+          schema: 
+            type: string
+        - name: enabled
+          in: query
+          required: false
+          description: Retrieve only enabled or disabled
+          schema:
+            type: boolean
+      responses: 
+        200:
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  message: 
+                    type: string
+                    example: 'Archivos recuperados exitosamente'
+                  files:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/File'
+
+  /file/get/id/{id}:
+    get: 
+      summary: Retrieve file record by Id
+      tags:
+        - File
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: File record Id
+          schema:
+            type: string
+      responses:
+        200: 
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: 'Archivo recuperado exitosamente'
+                  file:
+                    $ref: '#/components/schemas/File'
+
+  /file/get/file/{id}:
+    get:
+      summary: Retrieve file by Id
+      tags:
+        - File
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: File record Id
+          schema:
+            type: string
+      responses:
+        200: 
+          content:
+            application/file:
+              schema:
+                type: string
+                format: binary
+
+  /file/get/public/file/{id}:
+    get:
+      summary: Retrieve public file by Id {URL}
+      tags:
+        - File
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: File record Id
+          schema:
+            type: string
+      responses:
+        200: 
+          content:
+            application/file:
+              schema:
+                type: string
+                format: binary
+  
+  /file/create/{owner}/{foldername}:
+    post: 
+      summary: Create a file record, upload, store and link a file to the newly created record
+      tags:
+        - File
+      parameters:
+        - name: owner
+          in: path
+          required: true
+          description: User Id of the File owner
+          schema:
+            type: string
+        - name: foldername
+          in: path
+          required: true
+          description: Destination folder name
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+              required: 
+                - file
+      responses:
+        201: 
+          content:
+            application/json: 
+              schema:
+                type: object
+                properties:
+                  message: 
+                    type: string
+                    example: 'Archivo relacionado exitosamente'
+                  file: 
+                    $ref: '#/components/schemas/File'
+  
+  /file/update/{id}/{foldername}:
+    put:
+      summary: Update File record by Id
+      tags:
+        - File
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: File record Id
+          schema:
+            type: string
+        - name: foldername
+          in: path
+          required: true
+          description: Destination folder name
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+              required: 
+                - file
+      responses:
+        200: 
+          content:
+            application/json: 
+              schema:
+                type: object
+                properties:
+                  message: 
+                    type: string
+                    example: 'Archivo actualizado exitosamente'
+                  file: 
+                    $ref: '#/components/schemas/File'
+
+  /file/enable/{id}:
+    patch: 
+      summary: Enable File by Id
+      tags:
+        - File
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: File Id
+          schema:
+            type: string
+      responses: 
+        200:
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  message: 
+                    type: string
+                    example: 'Archivo recuperado exitosamente'
+                  file:
+                    $ref: '#/components/schemas/File'
+  
+  /file/disable/{id}:
+    patch: 
+      summary: Disable File by Id
+      tags:
+        - File
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: File Id
+          schema:
+            type: string
+      responses: 
+        200:
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  message: 
+                    type: string
+                    example: 'Archivo eliminado exitosamente'
+                  file:
+                    $ref: '#/components/schemas/File'
+
+  /file/delete/{id}:
+    delete: 
+      summary: Delete File record by Id
+      tags:
+        - File
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: File record Id
+          schema:
+            type: string
+      responses:
+        200: 
+          content:
+            application/json: 
+              schema:
+                type: object
+                properties:
+                  message: 
+                    type: string
+                    example: 'Archivo eliminado exitosamente'
+                  file: 
+                    $ref: '#/components/schemas/File'
+
