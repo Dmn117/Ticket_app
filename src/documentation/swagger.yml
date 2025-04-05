@@ -113,6 +113,64 @@ components:
         createdAt: 2024-10-16T20:30:00.501+00:00
         updatedAt: 2024-10-16T20:30:00.501+00:00
 
+    
+    EmailResponse:
+      type: object
+      properties:
+        accepted:
+          type: array
+          items:
+            type: string
+        rejected:
+          type: array
+          items:
+            type: string
+        ehlo:
+          type: array
+          items:
+            type: string
+        envelopeTime:
+          type: number
+        messageTime:
+          type: number
+        messageSize:
+          type: number
+        response:
+          type: string
+        envelope: 
+          type: object
+          properties:
+            from:
+              type: string
+            to:
+              type: array
+              items:
+                type: string
+        messageId:
+          type: string
+      example:
+        accepted: 
+          - accepted@example.com
+        rejected:
+          - rejected@example.com
+        ehlo:
+          - SIZE 52428800
+          - 8BITMIME
+          - PIPELINING
+          - PIPECONNECT
+          - AUTH PLAIN LOGIN
+          - HELP
+        envelopeTime: 349
+        messageTime: 230
+        messageSize: 1790
+        response: 250 OK id=4zH5VS-0002GR-3B
+        envelope:
+          from: from@example.com
+          to: 
+            - accepted@example.com
+            - rejected@example.com
+        messageId: <860b5b7a-71ca-ec2s-e4e3-1cbbf2x97f32@grupoveloci.com.mx>
+
     File: 
       type: object
       properties:
