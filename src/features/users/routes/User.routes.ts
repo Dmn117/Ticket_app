@@ -1,12 +1,10 @@
-import passport from "passport";
 import { Router } from "express";
-
+import passport from "passport";
 import UserController from "../controllers/User.controller";
 import validatorHandler from "../../../shared/middlewares/validator.handler";
-
-import { Permissions, RequestProperties, Segments } from "../../../shared/config/enumerates";
-import { checkPermission } from "../../../shared/middlewares/auth.handler";
 import { createUserSchema, getUserSchema, getUsersSchema, loginUserSchema, getUserByEmailSchema, updateUserSchema, validateUserSchema, recoverPassworSchema, createUsersArraySchema } from "../validators/User.validators";
+import { RequestProperties, Roles, SpecialPermissions } from "../../../shared/config/enumerates";
+import { checkRoles, checkRolesAndPermissions } from "../../../shared/middlewares/auth.handler";
 
 
 const UserRoutes: Router = Router();
@@ -15,7 +13,6 @@ const UserRoutes: Router = Router();
 UserRoutes.get(
     '/get/all',
     passport.authenticate('jwt', { session: false }),
-    checkPermission(Segments.USERS, Permissions.FIND),
     validatorHandler(getUsersSchema, RequestProperties.query),
     UserController.getUsers
 );
@@ -23,7 +20,6 @@ UserRoutes.get(
 UserRoutes.get(
     '/get/id/:id',
     passport.authenticate('jwt', { session: false }),
-    checkPermission(Segments.USERS, Permissions.FIND),
     validatorHandler(getUserSchema, RequestProperties.params),
     UserController.getUserById
 );
@@ -39,7 +35,7 @@ UserRoutes.post(
 UserRoutes.post(
     '/create',
     // passport.authenticate('jwt', { session: false }),
-    // checkPermission(Segments.USERS, Permissions.CREATE),
+    // checkRolesAndPermissions([Roles.ADMIN], [SpecialPermissions.createUser]),
     validatorHandler(createUserSchema, RequestProperties.body),
     UserController.create
 );
@@ -47,7 +43,7 @@ UserRoutes.post(
 UserRoutes.post(
     '/create-in-bulk',
     passport.authenticate('jwt', { session: false }),
-    checkPermission(Segments.USERS, Permissions.CREATE),
+    checkRolesAndPermissions([Roles.ADMIN], [SpecialPermissions.createUser]),
     validatorHandler(createUsersArraySchema, RequestProperties.body),
     UserController.createInBulk
 );
@@ -71,7 +67,7 @@ UserRoutes.post(
 UserRoutes.put(
     '/update/:id',
     passport.authenticate('jwt', { session: false }),
-    checkPermission(Segments.USERS, Permissions.UPDATE),
+    checkRolesAndPermissions([Roles.ADMIN], [SpecialPermissions.updateUser]),
     validatorHandler(getUserSchema, RequestProperties.params),
     validatorHandler(updateUserSchema, RequestProperties.body),
     UserController.update
@@ -82,7 +78,7 @@ UserRoutes.put(
 UserRoutes.patch(
     '/disable/:id',
     passport.authenticate('jwt', { session: false }),
-    checkPermission(Segments.USERS, Permissions.DISABLE),
+    checkRolesAndPermissions([Roles.ADMIN], [SpecialPermissions.disableUser]),
     validatorHandler(getUserSchema, RequestProperties.params),
     UserController.disbled
 );
@@ -90,7 +86,7 @@ UserRoutes.patch(
 UserRoutes.patch(
     '/enable/:id',
     passport.authenticate('jwt', { session: false }),
-    checkPermission(Segments.USERS, Permissions.ENABLE),
+    checkRolesAndPermissions([Roles.ADMIN], [SpecialPermissions.enableUser]),
     validatorHandler(getUserSchema, RequestProperties.params),
     UserController.enabled
 );
@@ -111,5 +107,14 @@ UserRoutes.patch(
     validatorHandler(recoverPassworSchema, RequestProperties.body),
     UserController.recoverPassword
 );
+
+
+UserRoutes.patch(
+    '/average/recalculate/:id',
+    passport.authenticate('jwt', { session: false }),
+    validatorHandler(getUserSchema, RequestProperties.params),
+    UserController.recalculateAverageById
+);
+
 
 export default UserRoutes;

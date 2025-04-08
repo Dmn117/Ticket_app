@@ -1,33 +1,52 @@
 import { model, Schema } from "mongoose";
 
 import IUser from "../interfaces/User.interfaces";
-
-import { VCODE_LENGTH } from "../../../shared/config/constants";
-import { generateVerificationCode } from "../../../shared/utils/lib/VerificationCode";
+import { Roles } from "../../../shared/config/enumerates";
+import { VCODE_FIRST_EXP, VCODE_LENGTH } from "../../../shared/config/constants";
+import { generateVerificationCode, calculateCodeExirationDate } from "../../../shared/utils/lib/VerificationCode";
 
 
 const schema: Schema = new Schema<IUser>(
     {
         firstName: { 
             type: String, 
-            required: [true, 'El "firstName" es requerido'] 
+            required: [true, 'The "firstName" field is required'] 
         },
         lastName: {
             type: String,
-            required: [true, 'El "lastName" es requerido']
+            required: [true, 'The "lastName" filed is required']
         },
         email: {
             type: String,
             unique: true,
-            required: [true, 'El campo "email" es requerido']
+            required: [true, 'The "email" field is required']
         },
         password: {
             type: String,
-            required: [true, 'El campo "password" es requerido']
+            required: [true, 'The "password" field is required']
         },
         role: {
             type: String,
-            default: 'Usuario'
+            default: Roles.USER
+        },
+        specialPermissions: [{
+            type: String
+        }],
+        rating: {
+            type: Number,
+            default: 0
+        },
+        evaluatedTickets: {
+            type: Number,
+            default: 0
+        },
+        closedTickets: {
+            type: Number,
+            default: 0
+        },
+        reporter: {
+            type: Boolean,
+            default: false
         },
         verificationCode: {
             type: String,
@@ -59,10 +78,10 @@ const schema: Schema = new Schema<IUser>(
             ref: 'User',
             default: null
         },
-        permissions: {
+        departments: [{
             type: Schema.Types.ObjectId,
-            ref: 'PermissionGroup'
-        }
+            ref: 'Department'
+        }]
     },
     {
         timestamps: true

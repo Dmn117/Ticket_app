@@ -1,21 +1,21 @@
 import boom from '@hapi/boom';
-import { FilterQuery } from 'mongoose';
 import { JwtPayload } from 'jsonwebtoken';
 import { Request, Response } from "express";
 
 import File from "../models/File.model";
 import IFile from "../interfaces/File.interfaces";
+import FileQueryParams from '../interfaces/FileQueryParams';
 import CustomError from "../../../shared/interfaces/CustomError";
 import ErrorHandler from "../../../shared/interfaces/ErrorHandler";
-import { validatePermission } from '../../../shared/middlewares/auth.handler';
-import { Permissions, Segments } from '../../../shared/config/enumerates';
+
+import { Roles } from '../../../shared/config/enumerates';
 
 class FileController {
 
     //! Private 
 
-    private static assembleQueryParams = (req: Request): FilterQuery<IFile> => {
-        const params: FilterQuery<IFile> = {};
+    private static assembleQueryParams = (req: Request): Partial<FileQueryParams> => {
+        const params: Partial<FileQueryParams> = {};
 
         if (req.query.owner) params.owner = req.query.owner.toString();
 
@@ -24,28 +24,16 @@ class FileController {
         return params;
     };
 
-    private static isAdmin = (req: Request): boolean => {
-        const user: JwtPayload | undefined = req.user;
-        
-        return validatePermission(
-            Segments.FILES, 
-            Permissions.ENABLE, 
-            user 
-                ? user.permissions.permissions 
-                : []
-            );
-    };
 
     //! Public
 
-    //* GET Methods
+    //! GET Methods
 
     //? Get All Files or some by Query Parameters
     public static getAll = async (req: Request, res: Response, next: ErrorHandler): Promise<void> => {
         try {
-            const params = this.assembleQueryParams(req);
-
-            const files: IFile[] = await File.find(params, this.isAdmin(req));
+            const params: Partial<FileQueryParams> = this.assembleQueryParams(req);
+            const files: IFile[] = await File.find(params);
 
             res.status(200).json({
                 message: 'Archivos recuperados exitosamente',
@@ -61,7 +49,9 @@ class FileController {
     public static getByID = async (req: Request, res: Response, next: ErrorHandler): Promise<void> => {
         try {
             const id: string = req.params.id;
-            const file: IFile = await File.findById(id, this.isAdmin(req));
+            const user: JwtPayload | undefined = req.user;
+
+            const file: IFile = await File.findById(id, user?.role === Roles.ADMIN || false);
 
             res.status(200).json({
                 message: 'Archivo recuperado exitosamente',
@@ -76,28 +66,18 @@ class FileController {
     public static getFileByID = async (req: Request, res: Response, next: ErrorHandler): Promise<void> => {
         try {
             const id: string = req.params.id;
-            const { filePath, success } = await File.findFileById(id, this.isAdmin(req));
+            const user: JwtPayload | undefined = req.user;
 
+            const { filePath, success } = await File.findFileById(id, user?.role === Roles.ADMIN || false);
+
+            res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
             res.status(success ? 200 : 404).sendFile(filePath);
         } catch (error) {
             next(error as CustomError);
         }
     };
 
-
-    //? Get File by ID
-    public static getPublicFileByID = async (req: Request, res: Response, next: ErrorHandler): Promise<void> => {
-        try {
-            const id: string = req.params.id;
-            const { filePath, success } = await File.findFileById(id, this.isAdmin(req), true);
-
-            res.status(success ? 200 : 404).sendFile(filePath);
-        } catch (error) {
-            next(error as CustomError);
-        }
-    };
-
-    //* POST Methods
+    //! POST Methods
 
     //? Create and Upload a new File Record
     public static create = async (req: Request, res: Response, next: ErrorHandler): Promise<void> => {
@@ -121,7 +101,7 @@ class FileController {
         }
     };
 
-    //* PUT Methods
+    //! PUT Methods
 
     //? Update File by ID
     public static update = async (req: Request, res: Response, next: ErrorHandler): Promise<void> => {
@@ -141,7 +121,7 @@ class FileController {
         }
     };
 
-    //* PATCH Methods
+    //! PATCH Methods
 
     //? Enable File by Id
     public static enable = async (req: Request, res: Response, next: ErrorHandler): Promise<void> => {
@@ -149,7 +129,7 @@ class FileController {
             const id: string = req.params.id;
             const user: JwtPayload | undefined = req.user;
 
-            const organization = await File.enableDisable(id, this.isAdmin(req), user);
+            const organization = await File.enableDisable(id, true, user);
             
             res.status(200).json({
                 message: 'Archivo recuperado exitosamente',
@@ -168,7 +148,7 @@ class FileController {
             const id: string = req.params.id;
             const user: JwtPayload | undefined = req.user;
 
-            const organization = await File.enableDisable(id, this.isAdmin(req), user);
+            const organization = await File.enableDisable(id, false, user);
             
             res.status(200).json({
                 message: 'Archivo eliminado exitosamente',
@@ -182,7 +162,7 @@ class FileController {
 
 
 
-    //* DELETE Methods
+    //! DELETE Methods
 
     //? Enable File by ID
     public static delete = async (req: Request, res: Response, next: ErrorHandler): Promise<void> => {

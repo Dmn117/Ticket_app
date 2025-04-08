@@ -1,35 +1,29 @@
 import bcrypt from 'bcrypt';
-import mongoose, { FilterQuery, PopulateOptions } from 'mongoose';
-import boom, { isBoom } from '@hapi/boom';
+import boom from '@hapi/boom';
+import mongoose from 'mongoose';
 import { SentMessageInfo } from 'nodemailer';
 
 import UserSchema from '../schemas/User.schema';
+import IUser, { UserPublicFields } from "../interfaces/User.interfaces";
+import Ticket from '../../tickets/models/Ticket.model';
 import SMTP from '../../../shared/services/email.service';
-import CustomError from '../../../shared/interfaces/CustomError';
-import PermissionGroup from '../../permissionGroups/models/PermissionGroup';
+import UserQueryParams from "../interfaces/UserQueryParams";
+import Department from '../../departments/models/Department.model';
+import IDepartment from '../../departments/interfaces/Department.interfaces';
 
-import { UserCounters } from '../../../shared/config/enumerates';
-import IUser, { ShortUser, UserEntry, UserWithPopulate } from "../interfaces/User.interfaces";
+import { ITicket } from '../../tickets/interfaces/Ticket.interfaces';
+import { USER_TEMPLATE } from '../../../shared/utils/lib/PublicFields';
+import { TicketStatus, UserCounters } from '../../../shared/config/enumerates';
 import { accountConfirmationTemplate, verificationCodeTemplate } from '../../../shared/config/pages';
 import { generateVerificationCode, calculateCodeExirationDate } from '../../../shared/utils/lib/VerificationCode';
 import { FRONTEND_URL, HASH_ROUNDS, MAX_VALIDATION_ATTEMPTS, SMTP_USER, VCODE_EXP, VCODE_FIRST_EXP, VCODE_LENGTH } from '../../../shared/config/constants';
-import File from '../../files/models/File.model';
-import { USER_TEMPLATE } from '../../../shared/utils/lib/PublicFields';
-
 
 
 class User {
     //! ↓Private
 
     //? Public User Template
-    private static PUBLIC_FIELDS = USER_TEMPLATE;
-    
-
-    //? Populate Options
-    private static populateOptions: PopulateOptions = {
-        path: 'permissions',
-        match: { enabled: true }
-    };
+    private static publicAttributes = USER_TEMPLATE;
 
     //? Generate hash for the password
     private static generatePassword = async (password: string): Promise<string> => {
@@ -41,56 +35,31 @@ class User {
         return await bcrypt.compare(newPassword, oldPassword);
     };
 
+    //? Validate if email is already in use
+    private static validateEmail = async (email: string): Promise<void> => {
+        const user: IUser | null = await UserSchema.findOne({ email });
 
-    //? Validate Duplicate Keys
-    private static async validateDuplicateKey(field: string, value: string, id?: string): Promise<void> {
-        const exists = await UserSchema.exists({ [field]: value });
-    
-        if (!exists || exists._id.toHexString() === id) return;
-    
-        throw boom.conflict(`El campo "${field.toUpperCase()}: ${value}" que intenta asociar ya se encuentra registrado`);
+        if (user) throw boom.conflict('El Email proporcionado ya se encuentra en uso')
     };
 
-    //? Validate if permissions exists
-    private static validatePermissions = async (data: Partial<UserEntry>): Promise<void> => {
-        if (!data.permissions) throw boom.badRequest('El grupo de permisos no puede ser nulo o vacio');
-        
-        data.permissions = (await PermissionGroup.validateExistence(data.permissions)).toHexString();
-    };
+    //? Validate Department Ids 
+    private static validateDepartments = async (departments: mongoose.Types.ObjectId[]): Promise<void> => {
+        const promises: Promise<IDepartment>[] = departments.map(department => {
+            return Department.findById(department.toString())
+        });
 
-    //? Validate if the new password is the same as the old one
-    private static validatePassword = async (id: string, data: Partial<UserEntry>): Promise<void> => {
-        const fullUser: IUser = await this.findById(id, true);
-
-        if (!data.password) throw boom.conflict('La contraseña no puede ir vacia');
-        
-        const isMatch: boolean = await this.comparePassword(data.password, fullUser.password);
-
-        if (isMatch) throw boom.conflict('La nueva contraseña no puede ser igual a la anterior');
-
-        data.password = await this.generatePassword(data.password);
+        await Promise.allSettled(promises);
     };
 
     //? Validation Data
-    private static validations = async (data: Partial<UserEntry>, id?: string): Promise<void> => {
+    private static validations = async (data: Partial<IUser>): Promise<void> => {
         const validations: Promise<any>[] = [];
 
-        if (data.email) {
-            data.email = data.email.toLowerCase();
-            validations.push(this.validateDuplicateKey('email', data.email, id));
-        }
+        if (data.email) 
+            validations.push(this.validateEmail(data.email));
 
-        if (data.permissions) 
-            validations.push(this.validatePermissions(data));
-
-        if (data.avatar)
-            validations.push(File.exists('_id', data.avatar));
-
-        if (data.boss)
-            validations.push(this.exists('_id', data.boss));
-
-        if (id && data.password) 
-            validations.push(this.validatePassword(id, data));
+        if (data.departments) 
+            validations.push(this.validateDepartments(data.departments));
 
         await Promise.all(validations);
     };
@@ -116,7 +85,7 @@ class User {
         const response = await SMTP.send({
             from: `Whatever 😎" <${SMTP_USER}>`,
             to: email,
-            subject: 'Confirmación de cuenta | Ticket Application',
+            subject: 'Confirmación de cuenta | Tickets',
             html
         });
 
@@ -126,20 +95,32 @@ class User {
 
     private static validationFailed = async (user: IUser): Promise<void> => {
         if (user.validationAttempts >= MAX_VALIDATION_ATTEMPTS-1) 
-            await this.enableDisable(user._id.toHexString(), false);
+            await this.enableDisable(user._id.toString(), false);
 
-        await this.increaseCounter(user._id.toHexString(), UserCounters.validationAttempts);
+        await this.increaseCounter(user._id.toString(), UserCounters.validationAttempts);
+    };
+
+    //? Get Ticket Rating Average 
+    private static ticketRateAverage = async (user: IUser): Promise<number> => {
+        const tickets: ITicket[] = await Ticket.find({assignedTo: user._id.toString()});
+
+        user.closedTickets = tickets.filter(ticket => [TicketStatus.CLOSED, TicketStatus.CANCELED].includes(ticket.status as TicketStatus)).length;
+        user.evaluatedTickets = tickets.filter(ticket => ticket.rating > 0).length;
+        
+        return tickets.reduce((acc, ticket) => { 
+            return acc + ticket.rating > 0 ? acc + ticket.rating : acc;
+         }, 0) / user.closedTickets;
     };
 
 
     //! ↓Public
 
     //? Find Users by Query Parameters
-    public static find = async (params: FilterQuery<IUser>, full: boolean): Promise<IUser[]> => {
+    public static find = async (params: Partial<UserQueryParams>, full: boolean): Promise<IUser[]> => {
         let users: IUser[] = [];
 
-        if (full) users = await UserSchema.find(params).populate(this.populateOptions);
-        else users = await UserSchema.find(params, this.PUBLIC_FIELDS).populate(this.populateOptions);
+        if (full) users = await UserSchema.find(params);
+        else users = await UserSchema.find(params, this.publicAttributes);
 
         if (users.length === 0) throw boom.notFound('Usuarios no encontrados');
 
@@ -151,8 +132,8 @@ class User {
     public static findById = async (id: string, full: boolean): Promise<IUser> => {
         let user: IUser | null = null;
 
-        if (full) user = await UserSchema.findById(id).populate(this.populateOptions);
-        else user = await UserSchema.findById(id, this.PUBLIC_FIELDS).populate(this.populateOptions);
+        if (full) user = await UserSchema.findById(id);
+        else user = await UserSchema.findById(id, this.publicAttributes);
 
         if (!user) throw boom.notFound('Usuario no encontrado');
 
@@ -164,14 +145,13 @@ class User {
     public static findByEmail = async (email: string, full: boolean): Promise<IUser> => {
         let user: IUser | null = null;
 
-        if (full) user = await UserSchema.findOne({ email }).populate(this.populateOptions);
-        else user = await UserSchema.findOne({ email }, this.PUBLIC_FIELDS).populate(this.populateOptions);
+        if (full) user = await UserSchema.findOne({ email });
+        else user = await UserSchema.findOne({ email }, this.publicAttributes);
 
         if (!user) throw boom.notFound('Usuario no encontrado');
 
         return user;
     };
-
 
     //? Validate if a User exists by Id
     public static exists = async (field: string, value: string): Promise<mongoose.Types.ObjectId> => {
@@ -184,17 +164,22 @@ class User {
 
 
     //? Get Short User
-    public static getShortUser = (user: IUser | UserWithPopulate): ShortUser => {
+    public static getShortUser = (user: IUser): UserPublicFields => {
         return {
             _id: user._id,
             firstName: user.firstName,
             lastName: user.lastName,
             email: user.email,
             role: user.role,
+            specialPermissions: user.specialPermissions,
+            rating: user.rating,
+            closedTickets: user.closedTickets,
+            evaluatedTickets: user.evaluatedTickets,
+            reporter: user.reporter,
             enabled: user.enabled,
             avatar: user.avatar,
             boss: user.boss,
-            permissions: user.permissions,
+            departments: user.departments,
             createdAt: user.createdAt,
             updatedAt: user.updatedAt,
         }
@@ -202,13 +187,16 @@ class User {
 
 
     //? Create a new User
-    public static create = async (data: UserEntry): Promise<Partial<IUser>> => {
+    public static create = async (data: IUser): Promise<Partial<IUser>> => {
         await this.validations(data);
+
+        const password: string = await this.generatePassword(data.password);
+        const codeExpirationDate: Date = calculateCodeExirationDate(VCODE_FIRST_EXP);
 
         const user: IUser = await UserSchema.create({ 
             ...data, 
-            password: await this.generatePassword(data.password), 
-            codeExpirationDate: calculateCodeExirationDate(VCODE_FIRST_EXP)
+            password, 
+            codeExpirationDate 
         });
 
         this.sendConfirmationMail(
@@ -220,43 +208,52 @@ class User {
             user.verificationCode
         );
 
-        return this.getShortUser(user) as IUser;
+        return {
+            _id: user._id,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            email: user.email,
+            role: user.role,
+            reporter: user.reporter,
+            enabled: user.enabled,
+            avatar: user.avatar,
+            boss: user.boss,
+            departments: user.departments,
+            createdAt: user.createdAt,
+            updatedAt: user.updatedAt,
+        };
     };
 
 
     //? Create Users in bulk
-    public static createInBulk = async (data: UserEntry[]): Promise<PromiseSettledResult<Partial<IUser>>[]> => {
-        const promises: PromiseSettledResult<Partial<IUser>>[] = [];
-
-        for (const user of data) {
-            try {
-                const newUser = await this.create(user);
-                promises.push({ status: 'fulfilled', value: newUser });
-            }
-            catch (error) {
-                let reason: string = '';
-
-                if (isBoom(error)) reason = error.output.payload.message;
-                else reason = (error as CustomError).message;
-
-                promises.push({ status: 'rejected', reason })
-            }
-        }
+    public static createInBulk = async (data: IUser[]): Promise<PromiseSettledResult<Partial<IUser>>[]> => {
+        const promises = await Promise.allSettled(
+            data.map(user => this.create(user))
+        );
 
         return promises;
     };
 
 
     //? Update User by Id
-    public static update = async (id: string, data: Partial<UserEntry>): Promise<IUser> => {
-        await this.validations(data, id);
+    public static update = async (id: string, data: Partial<IUser>): Promise<IUser> => {
+        await this.validations(data);
+        
+        if (data.password) {
+            const fullUser: IUser = await this.findById(id, true);
+            const isMatch: boolean = await this.comparePassword(data.password, fullUser.password);
+
+            if (isMatch) throw boom.conflict('La nueva contraña no puede ser igual a la anterior')
+
+            data.password = await this.generatePassword(data.password);
+        }
 
         const user: IUser | null = await UserSchema.findByIdAndUpdate(
             id, 
-            data,
+            data, 
             { 
                 new: true, 
-                fields: this.PUBLIC_FIELDS 
+                fields: this.publicAttributes 
             }
         );
 
@@ -286,7 +283,7 @@ class User {
         const response = await SMTP.send({
             from: `Whatever 😎" <${SMTP_USER}>`,
             to: user.email,
-            subject: 'Código de verificación | Ticket Application',
+            subject: 'Código de verificación | Tickets',
             html
         });
 
@@ -334,7 +331,7 @@ class User {
         const user: IUser = await this.findByEmail(email, false);
 
         const validated: boolean = await this.validateVerificationCode(
-            user._id.toHexString(), 
+            user._id.toString(), 
             verificationCode
         );
 
@@ -357,28 +354,50 @@ class User {
 
         const isMatch: boolean = await this.comparePassword(password, user.password);
 
-        if (isMatch) throw boom.conflict('La nueva contraseña no puede ser igual a la anterior')
+        if (isMatch) throw boom.conflict('La nueva contraña no puede ser igual a la anterior')
 
-        await this.validateVerificationCode(user._id.toHexString(), verificationCode);
+        await this.validateVerificationCode(user._id.toString(), verificationCode);
 
-        user = await this.update(user._id.toHexString(), { password, validated: true });
+        user = await this.update(user._id.toString(), { password, validated: true });
         
         return user;
     };
 
 
-    //? Increase Internal Counter by id
+    //? Increase Counter Of Closed Tickets
     public static increaseCounter = async (id: string, property: UserCounters): Promise<IUser> => {
         let user: IUser | null = null;
 
         switch (property) {
+            case UserCounters.closedTickets:
+                user = await UserSchema.findByIdAndUpdate(
+                    id,
+                    { $inc: { closedTickets: 1 }},
+                    { 
+                        new: true,
+                        fields: this.publicAttributes
+                    }
+                );
+                break;
+
+            case UserCounters.evaluatedTickets:
+                user = await UserSchema.findByIdAndUpdate(
+                    id,
+                    { $inc: { evaluatedTickets: 1 }},
+                    { 
+                        new: true,
+                        fields: this.publicAttributes
+                    }
+                );
+                break;
+
             case UserCounters.validationAttempts:
                 user = await UserSchema.findByIdAndUpdate(
                     id,
                     { $inc: { validationAttempts: 1 }},
                     { 
                         new: true,
-                        fields: this.PUBLIC_FIELDS
+                        fields: this.publicAttributes
                     }
                 );
         };
@@ -388,6 +407,30 @@ class User {
         return user;
     };
 
+
+    //? Calculate average
+    public static calculateAverage = async (id: string): Promise<IUser> => {
+        const user: IUser = await this.findById(id, false);
+        const rating: number = await this.ticketRateAverage(user);
+
+        user.rating = Math.round(rating * 10) / 10;
+
+        await user.save();
+
+        return user;
+    };
+
+    //? Validate Departments for current agent
+    public static validateDepartmentsIncluded = async (
+        id: string, 
+        departments: mongoose.Types.ObjectId[]
+    ): Promise<boolean> => {
+        const user: IUser = await User.findById(id, false);
+
+        return departments.every(department => {
+            return user.departments.includes(department)
+        });
+    }; 
 }
 
 

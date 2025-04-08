@@ -1,24 +1,9 @@
-export enum Segments {
-    PERMISSION_GROUPS = 'PERMISSION_GROUPS',
-    USERS = 'USERS',
-    FILES = 'FILES',
-    ADDRESS = 'AADDRESS',
-    STORES = 'STORES',
-    PRODUCTS = 'PRODUCTS',
-    DIPOMEX = 'DIPOMEX',
-    CLIENTS = 'CLIENTS',
-    FRANCHISES = 'FRANCHISES',
-    SALES = 'SALES',
-};
-
-
-export enum Permissions {
-    FIND = 'FIND',
-    CREATE = 'CREATE',
-    UPDATE = 'UPDATE',
-    ENABLE = 'ENABLE',
-    DISABLE = 'DISABLE',
-    DELETE = 'DELETE',
+export enum Roles {
+    USER = 'USER',
+    AGENT = 'AGENT',
+    BOSS = 'BOSS',
+    DIRECTOR = 'DIRECTOR',
+    ADMIN = 'ADMIN',
 };
 
 
@@ -26,6 +11,36 @@ export enum UserCounters {
     evaluatedTickets = 'evaluatedTickets',
     closedTickets = 'closedTickets',
     validationAttempts = 'validationAttempts',
+};
+
+export enum TicketStatus {
+    OPEN = 'OPEN',
+    ASSIGNED = 'ASSIGNED',
+    IN_PROCESS = 'IN_PROCESS',
+    STOPPED = 'STOPPED',
+    ON_HOLD = 'ON_HOLD',
+    CANCELED = 'CANCELED',
+    CLOSED = 'CLOSED'
+};
+
+
+export enum TicketItems {
+    message = 'message',    
+    file = 'file',
+    department = 'department',
+    transfer = 'transfer',
+    assignedTo = 'assignedTo',
+    helpTopic = 'helpTopic',
+};
+
+
+export const TicketItemsTranslate = {
+    message : { text: 'Mensaje', end: 'o' },
+    file : { text: 'Archivo', end: 'o' },
+    department : { text: 'Departamento', end: 'o' },
+    transfer : { text: 'Transferencia', end: 'a' },
+    assignedTo : { text: 'Asignacion', end: 'a' },
+    helpTopic : { text: 'Tema de ayuda', end: 'o' },
 };
 
 
@@ -65,6 +80,11 @@ export enum MessageAttachmentType {
 };
 
 
+export enum ModelsWithCounters {
+    Ticket = 'Ticket'
+};
+
+
 export enum SocketEvents {
     Test = 'test',
     Join = 'join',
@@ -78,10 +98,17 @@ export enum SocketEvents {
 
 
 
-export enum DipomexSections {
-    zipCode = 'codigo_postal',
-    state = 'estado',
-    states = 'estados',
-    municipalities = 'municipios',
-    colonias = 'colonies'
-}
+export enum SpecialPermissions {
+    createUser = 'createUser',
+    updateUser = 'updateUser',
+    enableUser = 'enableUser',
+    disableUser = 'disableUser',
+};
+
+
+export enum TicketNotificationEMail {
+    CREATION = 'CREATION',
+    ASIIGNMENT_FOR_AGENT = 'ASIIGNMENT_FOR_AGENT',
+    ASSIGNMENT_FOR_AUTHOR = 'ASSIGNMENT_FOR_AUTHOR',
+    CLOSING = 'CLOSING'
+};

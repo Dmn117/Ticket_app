@@ -1,10 +1,11 @@
-import Jwt, { JwtPayload } from "jsonwebtoken";
+import boom from '@hapi/boom';
+import Jwt from "jsonwebtoken";
 import type { StringValue } from "ms";
-import { FilterQuery } from "mongoose";
 import { Request, Response } from "express";
 
 import User from "../models/User.model";
 import IUser from "../interfaces/User.interfaces";
+import UserQueryParams from "../interfaces/UserQueryParams";
 import CustomError from "../../../shared/interfaces/CustomError";
 import ErrorHandler from "../../../shared/interfaces/ErrorHandler";
 import { JWT_EXP, JWT_PRIVATE_KEY } from "../../../shared/config/constants";
@@ -14,8 +15,8 @@ class UserController {
     //! Private ↓
     
     //? Assemble Query Parameters
-    private static assembleQueryParams = (req: Request): FilterQuery<IUser> => {
-        const params: FilterQuery<IUser> = {};
+    private static assembleQueryParams = (req: Request): Partial<UserQueryParams> => {
+        const params: Partial<UserQueryParams> = {};
 
         if (req.query.firstName)
             params.firstName = { $regex: req.query.firstName.toString(), $options: 'i' };
@@ -26,7 +27,7 @@ class UserController {
         if (req.query.email) params.email = req.query.email.toString();
 
         if (req.query.role) {
-            if (!req.query.includesRoles || req.query.includesRoles === 'true'){
+            if (req.query.includesRoles && req.query.includesRoles.toString() === 'true'){
                 params.role = { $in: req.query.role.toString().split(', ')};
             }
             else {
@@ -55,7 +56,7 @@ class UserController {
         if (req.query.boss) params.boss = req.query.boss.toString();
 
         if (req.query.departments) {
-            if (!req.query.includesDepartments || req.query.includesDepartments === 'true') {
+            if (req.query.includesDepartments && req.query.includesDepartments.toString() === 'true') {
                 params.departments = { $in: req.query.departments.toString().split(', ') }
             }
             else {
@@ -68,12 +69,12 @@ class UserController {
 
     //! Public ↓
 
-    //* GET Methods
+    //! GET Methods
 
     //? Get Users by Query Parameters
     public static getUsers = async (req: Request, res: Response, next: ErrorHandler): Promise<void> => {
         try {
-            const params: FilterQuery<IUser> = this.assembleQueryParams(req);
+            const params: Partial<UserQueryParams> = this.assembleQueryParams(req);
             const users: IUser[] = await User.find(params, false)
 
             res.status(200).json({
@@ -102,14 +103,18 @@ class UserController {
         }
     };
 
-    //* POST Methods
+    //! POST Methods
 
     //? Login User and Genereta Access Token (JWT)
     public static login = (req: Request, res: Response, next: ErrorHandler): void => {
         try {
             const user = req.user as IUser;
             
-            const payload: JwtPayload = { sub: user._id.toString() };
+            const payload = {
+                sub: user._id,
+                role: user.role,
+                specialPermissions: user.specialPermissions
+            };
 
             const token = Jwt.sign(payload, JWT_PRIVATE_KEY, { algorithm: 'RS256', expiresIn: (JWT_EXP as StringValue)  });
 
@@ -201,7 +206,7 @@ class UserController {
         }
     };
 
-    //* PUT Methods
+    //! PUT Methods
 
     //? Update User by Id
     public static update = async (req: Request, res: Response, next: ErrorHandler): Promise<void> => {
@@ -221,7 +226,7 @@ class UserController {
         }
     };
 
-    //* PATCH Methods
+    //! PATCH Methods
 
     //? Enabled User by Id
     public static enabled = async (req: Request, res: Response, next: ErrorHandler): Promise<void> => {
@@ -293,6 +298,23 @@ class UserController {
             next(error as CustomError);
         }
     };
+
+    //? Recalculate Ticket Rating Average by Id
+    public static recalculateAverageById = async (req: Request, res: Response, next: ErrorHandler): Promise<void> => {
+        try {
+            const id: string = req.params.id;
+            const user: IUser = await User.calculateAverage(id);
+
+            res.status(200).json({
+                message: 'Usuario actualizado exitosamente',
+                user
+            });
+        }
+        catch (error) {
+            next(error as CustomError);
+        }
+    };
+
 }
 
 export default UserController;

@@ -4,10 +4,10 @@ import cors from 'cors';
 
 
 const corsConfig: cors.CorsOptions = {
-    origin: '*', // Permitir todos los orígenes
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'], // Ajustar según tus necesidades
-    credentials: false
+  origin: '*', // Permitir todos los orígenes
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'], // Ajustar según tus necesidades
+  credentials: false
 };
 
 

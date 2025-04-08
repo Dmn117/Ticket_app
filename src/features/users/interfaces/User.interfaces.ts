@@ -1,71 +1,74 @@
 import { Document, Types } from "mongoose";
+import { Roles, SpecialPermissions } from "../../../shared/config/enumerates";
 
-import { IPermissionGroup, PermissionGroupEntry } from "../../permissionGroups/interfaces/PermissionGroup.interfaces";
 
+interface IUser extends Document {
+    _id: Types.ObjectId;
 
-export interface UserBase {
     firstName: string;
     lastName: string;
     email: string;
     password: string;
 
-    role: string;
-    
+    role: string | Roles;
+    reporter: boolean;
+    specialPermissions: SpecialPermissions[];
+
+    rating: number;
+    evaluatedTickets: number;
+    closedTickets: number;
+
     verificationCode: string;
     codeExpirationDate: Date;
     
     validated: boolean;
     enabled: boolean;
     validationAttempts: number;
-}
-
-
-export interface IUser extends Document, UserBase {
-    _id: Types.ObjectId;
 
     avatar: Types.ObjectId;
     boss: Types.ObjectId;
-    permissions: Types.ObjectId;
+    departments: Types.ObjectId[];
 
     createdAt: Date;
     updatedAt: Date;
 }
 
 
-export interface UserWithPopulate extends Omit<IUser, 'permissions'>{
-    permissions: IPermissionGroup;
-};
-
-
-export interface ShortUser extends Omit<
-    UserBase, 
-    'password' | 
-    'verificationCode' | 
-    'codeExpirationDate' | 
-    'validationAttempts' | 
-    'validated' | 
-    'permissions'
-> {
+export interface UserPublicFields {
     _id: Types.ObjectId;
+    
+    firstName: string;
+    lastName: string;
+    email: string;
+    
+    role: string;
+    reporter: boolean;
+    specialPermissions: SpecialPermissions[];
+
+    rating: number;
+    evaluatedTickets: number;
+    closedTickets: number;
+
+    enabled: boolean;
 
     avatar: Types.ObjectId;
     boss: Types.ObjectId;
-    permissions: Types.ObjectId | IPermissionGroup;
-
+    departments: Types.ObjectId[];
+    
     createdAt: Date;
     updatedAt: Date;
 }
 
 
-export interface UserEntry extends Omit<
-    UserBase, 
-    'verificationCode' | 
-    'codeExpirationDate' | 
-    'validationAttempts'
-> {
-    avatar: string;
-    boss: string;
-    permissions: string | PermissionGroupEntry;
+
+
+export interface ShortUser {
+    _id: Types.ObjectId;
+    
+    firstName: string;
+    lastName: string;
+    email: string;
 }
+
 
 export default IUser;

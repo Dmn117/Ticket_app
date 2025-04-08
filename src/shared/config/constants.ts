@@ -3,7 +3,7 @@ import fs from 'fs';
 
 dotenv.config({ path: './src/.env' });
 
-//! Load Process Env
+//! Load  Env
 const env = process.env;
 
 
@@ -39,6 +39,10 @@ export const HOME_PAGE: string = './src/shared/templates/pages/home.page.html';
 //? HTML Templates
 export const VERIFICATION_CODE: string = './src/shared/templates/views/VerificationCode.html';
 export const ACCOUNT_CONFIRMATION: string = './src/shared/templates/views/AccountConfirmation.html';
+export const TICKET_CREATION: string = './src/shared/templates/views/TicketCreation.html';
+export const ASSIGNED_TICKET_FOR_AGENT: string = './src/shared/templates/views/AssignedTicketForAgent.html';
+export const ASSIGNED_TICKET_FOR_AUTHOR: string = './src/shared/templates/views/AssignedTicketForAuthor.html';
+export const TICKET_CLOSING: string = './src/shared/templates/views/TicketClosing.html';
 
 //? IMG
 export const FILE_NOT_FOUND: string = `./src/shared/assets/img/fileNotFound.png`;
@@ -58,11 +62,19 @@ export const VCODE_LENGTH: number = Number(env.VCODE_LENGTH) || 5;
 export const VCODE_EXP: number = Number(env.VCODE_EXP) || 5;
 export const VCODE_FIRST_EXP: number = Number(env.VCODE_FIRST_EXP) || 1440;
 
+
 //? Fronted Url
 export const FRONTEND_URL: string = env.FRONTEND_URL || '';
 
+
 //? Relative Paths
 export const UPLOADS: string = './uploads';
+
+
+//? Maximum Ticket Rating
+export const MIN_TICKET_RATING: number = Number(env.MIN_TICKET_RATING) || 0;
+export const MAX_TICKET_RATING: number = Number(env.MAX_TICKET_RATING) || 5;
+
 
 //? Max validation attemps before disable user
 export const MAX_VALIDATION_ATTEMPTS: number = Number(env.MAX_VALIDATION_ATTEMPTS) || 3;
@@ -71,6 +83,7 @@ export const MAX_VALIDATION_ATTEMPTS: number = Number(env.MAX_VALIDATION_ATTEMPT
 //? Default Permission Group Profile Name 
 export const DEFAULT_PG_PROFILE: string = 'Personalizado';
 
-//? DIPOMEX API Key
-export const DIPOMEX_API_KEY: string = env.DIPOMEX_API_KEY || '';
-export const DIPOMEX_API_URL: string = env.DIPOMEX_API_URL || 'https://api.tau.com.mx/dipomex/v1';
+
+//? Maximum Agent Rating
+export const MIN_AGENT_RATING: number = Number(env.MIN_AGENT_RATING) || 1;
+export const MAX_AGENT_RATING: number = Number(env.MAX_AGENT_RATING) || 10;

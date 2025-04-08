@@ -14,10 +14,6 @@ const fileSchema: Schema = new Schema<IFile>(
             ref: 'User',
             default: null
         },
-        public: {
-            type: Boolean,
-            default: true
-        },
         enabled: {
             type: Boolean,
             default: true

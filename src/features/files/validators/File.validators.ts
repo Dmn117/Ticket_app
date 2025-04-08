@@ -10,8 +10,7 @@ const enabled = Joi.boolean();
 
 export const createFileSchema = Joi.object({
     owner: owner.required(),
-    foldername: foldername.required(),
-    public: Joi.boolean(),
+    foldername: foldername.required()
 });
 
 
@@ -27,6 +26,5 @@ export const getFileSchema = Joi.object({
 
 export const updateFileSchema = Joi.object({
     id: id.required(),
-    foldername: foldername.required(),
-    public: Joi.boolean(),
+    foldername: foldername.required()
 });

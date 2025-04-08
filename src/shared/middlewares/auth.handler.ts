@@ -1,30 +1,47 @@
 import boom from '@hapi/boom';
+import { JwtPayload } from "jsonwebtoken";
 import { Request, Response } from "express";
-
-import Permission from '../../features/permissionGroups/interfaces/PermissionGroup.interfaces';
-
-import { Permissions, Segments,  } from "../config/enumerates";
-import { UserWithPopulate } from '../../features/users/interfaces/User.interfaces';
+import { Roles, SpecialPermissions } from "../config/enumerates";
 
 
-export const validatePermission = (segment: Segments, permission: Permissions, permissions: Permission[]): boolean => {
-    const seg = permissions.find(perm => perm.segment === segment);
+export const checkRoles = (...roles: Roles[]) => {
 
-    return seg 
-        ? seg.permissions.includes(permission) 
-        : false;
-};
-
-
-export const checkPermission = (segment: Segments, permission: Permissions) => {
     return (req: Request, res: Response, next: Function): void => {
-        const user = req.user as UserWithPopulate | undefined;
+        const user: JwtPayload | undefined = req.user;
 
-        if (user && validatePermission(segment, permission, user.permissions.permissions)) {
+        if (user && roles.includes(user.role)) {
             next();
         }
         else {
             next(boom.unauthorized('Usuario sin permisos para esta accion'));
         }
     };
+
+};
+
+
+
+export const checkRolesAndPermissions = (
+    roles: Roles[],
+    specialPermissions: SpecialPermissions[]
+) => {
+
+    return (req: Request, res: Response, next: Function): void => {
+        const user: JwtPayload | undefined = req.user;
+
+        if (user &&
+            (
+                roles.includes(user.role) ||
+                user.specialPermissions.some((permission: SpecialPermissions) => {
+                    return specialPermissions.includes(permission);
+                })
+            )
+        ) {
+            next();
+        }
+        else {
+            next(boom.unauthorized('Usuario sin permisos para esta accion'));
+        }
+    };
+
 };

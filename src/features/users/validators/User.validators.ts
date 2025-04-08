@@ -1,41 +1,48 @@
 import Joi, { Schema } from "joi";
 import ExtendedJoi from "../../../shared/utils/lib/Extended.joi";
+import { Roles, SpecialPermissions } from "../../../shared/config/enumerates";
+import { MAX_TICKET_RATING, MIN_TICKET_RATING, VCODE_LENGTH } from "../../../shared/config/constants";
 
-import { VCODE_LENGTH } from "../../../shared/config/constants";
-import { createPermissionGroupSchema } from "../../permissionGroups/validators/PermissionGroup.validators";
+const firstName = Joi.string().min(3).max(50);
+const lastName = Joi.string().min(3).max(50);
+const email = Joi.string().email();
+const password = Joi.string().min(8);
 
-const firstName = ExtendedJoi.string().label('El Nombre del Usuario');
-const lastName = ExtendedJoi.string().label('El Apellido del Usuario');
-
-
-const email = ExtendedJoi.email().label('El Email');
-
-
-const password = ExtendedJoi.password().label('La Contraseña').messages({
-    'any.required': '"{{#label}}" es obligatoria.'
-});
+const role = Joi.string().valid(...(Object.values(Roles)));
+const specialPermissions = Joi.array().items(Joi.string().valid(...(Object.values(SpecialPermissions))));
 
 const includesRoles = Joi.boolean();
-const role = Joi.string();
+const roleQuery = Joi.string().min(3);
 
+const reporter = Joi.boolean();
 const validated = Joi.boolean();
 const enabled = Joi.boolean();
 
-const permissions = Joi.alternatives().try(createPermissionGroupSchema, ExtendedJoi.objectId(), Joi.string());
+const departments = Joi.array().items(ExtendedJoi.objectId());
+
+const includesDepartments = Joi.boolean();
+const departmentsQuery = Joi.string().min(24);
 
 const _id = ExtendedJoi.objectId();
 
 const verificationCode = Joi.string().length(VCODE_LENGTH);
+
+const rating = Joi.number().min(MIN_TICKET_RATING).max(MAX_TICKET_RATING);
 
 export const getUsersSchema: Schema = Joi.object({
     firstName,
     lastName,
     email,
     includesRoles,
-    role,
+    role: roleQuery,
+    reporter,
     validated, 
     enabled, 
     boss: _id,
+    includesDepartments,
+    departments: departmentsQuery,
+    ratingLte: rating,
+    ratingGte: rating,
 });
 
 
@@ -56,9 +63,11 @@ export const createUserSchema: Schema = Joi.object({
     email: email.required(),
     password: password.required(),
     role,
-    avatar: _id.allow(null),
-    boss: _id.allow(null),
-    permissions: permissions.required()
+    reporter,
+    specialPermissions,
+    avatar: _id,
+    boss: _id,
+    departments
 });
 
 
@@ -71,9 +80,11 @@ export const updateUserSchema: Schema = Joi.object({
     email,
     password,
     role,
-    avatar: _id.allow(null),
-    boss: _id.allow(null),
-    permissions
+    reporter,
+    specialPermissions,
+    avatar: _id,
+    boss: _id,
+    departments
 });
 
 

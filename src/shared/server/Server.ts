@@ -13,7 +13,7 @@ import corsConfig from '../config/cors.config';
 import homeRouter from '../../routers/home.router';
 import apiRouterV1 from '../../routers/api.router.v1';
 
-import { PORT } from '../config/constants';
+import { FRONTEND_URL, PORT } from '../config/constants';
 import { boomErrorHandler, errorHandler, logErrors, noSuchFileHandler, notFoundHandler } from '../middlewares/error.handler';
 
 class Server {
@@ -51,7 +51,7 @@ class Server {
         this.app.use('/api/v1', apiRouterV1);
 
         // Socket IO
-        // Socket.initSocket(this.server);
+        Socket.initSocket(this.server);
 
         // Documentation
         swagger(this.app);

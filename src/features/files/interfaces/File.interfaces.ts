@@ -8,7 +8,6 @@ interface IFile extends Document {
     owner: mongoose.Types.ObjectId;
     originalName: string,
 
-    public: boolean;
     enabled: boolean;
 
     createdAt: Date;
@@ -19,7 +18,6 @@ export interface FileEntry {
     path: string;
     owner: string;
     originalName: string;
-    public: boolean;
     enabled: boolean;
 }
 
