@@ -1,4 +1,3 @@
-import boom from '@hapi/boom';
 import Jwt from "jsonwebtoken";
 import type { StringValue } from "ms";
 import { Request, Response } from "express";

@@ -17,6 +17,7 @@ import { TicketStatus, UserCounters } from '../../../shared/config/enumerates';
 import { accountConfirmationTemplate, verificationCodeTemplate } from '../../../shared/config/pages';
 import { generateVerificationCode, calculateCodeExirationDate } from '../../../shared/utils/lib/VerificationCode';
 import { FRONTEND_URL, HASH_ROUNDS, MAX_VALIDATION_ATTEMPTS, SMTP_USER, VCODE_EXP, VCODE_FIRST_EXP, VCODE_LENGTH } from '../../../shared/config/constants';
+import CustomError from '../../../shared/interfaces/CustomError';
 
 
 class User {
@@ -154,10 +155,10 @@ class User {
     };
 
     //? Validate if a User exists by Id
-    public static exists = async (field: string, value: string): Promise<mongoose.Types.ObjectId> => {
+    public static exists = async (field: keyof IUser, value: any, error?: CustomError): Promise<mongoose.Types.ObjectId> => {
         const user = await UserSchema.exists({ [field]: value });
 
-        if (!user) throw boom.notFound('Usuario no encontrado');
+        if (!user) throw (error || boom.notFound('Usuario no encontrado'));
 
         return user._id;
     };
@@ -431,6 +432,18 @@ class User {
             return user.departments.includes(department)
         });
     }; 
+
+
+    //? Authenticate Validations
+    public static auth = async (id: string): Promise<void> => {
+        const user = await this.findById(id, true);
+
+        if (!user.validated) 
+            throw boom.unauthorized('Cuenta no verificada, es necesario verificar tu correo');
+        
+        if (!user.enabled)
+            throw boom.unauthorized('Cuenta deshabilitada por tu organizacion. Contacta con Soporte Tecnico');
+    };
 }
 
 

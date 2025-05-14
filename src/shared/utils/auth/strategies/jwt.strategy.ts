@@ -1,9 +1,9 @@
-import boom from '@hapi/boom';
-import { JwtPayload } from 'jsonwebtoken';
 import { ExtractJwt, Strategy, StrategyOptionsWithoutRequest } from "passport-jwt";
-
-import User from "../../../../features/users/models/User.model";
 import { JWT_PUBLIC_KEY } from "../../../config/constants";
+import { JwtPayload } from "jsonwebtoken";
+import User from "../../../../features/users/models/User.model";
+import { Roles } from "../../../config/enumerates";
+import Application from "../../../../features/applications/models/Application.model";
 
 
 const options: StrategyOptionsWithoutRequest = {
@@ -12,22 +12,15 @@ const options: StrategyOptionsWithoutRequest = {
 };
 
 
-const JwtStrategy = new Strategy(options, async (payload: JwtPayload, done) => {
+const JwtStrategy: Strategy = new Strategy(options, async (payload: JwtPayload, done) => {
     try {
-        const user = await User.findById(payload.sub || '', true);
+        const entity = (payload.role || '') === Roles.APPLICATION ? Application : User;
 
-        if (!user.validated) {
-            done(boom.unauthorized('Cuenta no verificada, es necesario verificar tu correo'), false);
-            return;
-        }
-        else if (!user.enabled) {
-            done(boom.unauthorized('Cuenta deshabilitada por tu organizacion. Contacta con Soporte Tecnico'), false);
-            return;
-        }
+        await entity.auth(payload.sub || '');
 
-        return done(null, User.getShortUser(user));
+        return done(null, payload);
     }
-    catch (error) {
+    catch (error){ 
         return done(error, false);
     }
 });

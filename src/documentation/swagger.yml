@@ -159,7 +159,7 @@ components:
           type: Date
       example: 
         _id: 6710124a014f3bcc26a122f8
-        name: 'Briva Internacional S.A. de C.V'
+        name: 'Empresa S.A. de C.V'
         enabled: true
         director: 
           _id: 671012480a4d3b5a26c712f3
@@ -483,6 +483,48 @@ components:
         evaluator: 672552ede0dd3ce2fe1f6930
         createdAt: 2024-10-16T20:30:00.501+00:00
         updatedAt: 2024-10-16T20:30:00.501+00:00
+
+
+    Application: 
+      type: object
+      properties:
+        _id:
+          type: string
+        name: 
+          type: string
+        enabled: 
+          type: boolean
+        owner: 
+          $ref: '#/components/schemas/User'
+        createdAt:
+          type: Date
+        updatedAt:
+          type: Date
+      example:
+        _id: 6710124c014d3baf26a882f2
+        name: Metabase
+        enabled: true
+        owner: 
+          _id: 671012480a4d3b5a26c712f3
+          firstName: Joe
+          lastName: Doe
+          email: joedoe@example.com
+          role: AGENT
+          specialPermissions:
+            - 'userRegistration'
+          rating: 4.5
+          evaluatedTickets: 10
+          closedTickets: 11
+          reporter: false
+          enabled: true
+          avatar: 67101248014d3b5f26a712f1
+          boss: 6710124c014d3baf26a882f2
+          departments: 
+            - 67101248014d3b5f26a712f1
+            - 671012c4514dab5126adb2f2
+          createdAt: 2024-10-16T20:30:00.501+00:00
+          updatedAt: 2024-10-16T20:30:00.501+00:00
+
         
 
 security:
@@ -1059,6 +1101,151 @@ paths:
                     $ref: '#/components/schemas/User'
   
 
+  /application/get/one:
+    get: 
+      summary: Get an Application by Query Parameters
+      tags: 
+        - Application
+      parameters:
+        - name: name
+          in: query
+          required: false
+          description: Name Application
+          schema: 
+            type: string
+        - name: enabled
+          in: query
+          required: false
+          description: Retrieve only enabled or disabled
+          schema: 
+            type: boolean
+        - name: owner
+          in: query
+          required: false
+          description: Owner Application
+          schema: 
+            type: string
+      responses: 
+        200: 
+          content: 
+            application/json: 
+              schema: 
+                type: object
+                properties:
+                  message: 
+                    type: string
+                    example: 'Aplicacion recuperada exitosamente'
+                  application:
+                    $ref: '#/components/schemas/Application'
+
+  /application/get/id/{id}:
+    get: 
+      summary: Get an Application by Id
+      tags: 
+        - Application
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Application record id in the DB
+          schema: 
+            type: string
+      responses: 
+        200: 
+          content: 
+            application/json: 
+              schema: 
+                type: object
+                properties:
+                  message: 
+                    type: string
+                    example: 'Aplicacion recuperada exitosamente'
+                  application:
+                    $ref: '#/components/schemas/Application'
+      
+  /application/create: 
+    post: 
+      summary: Create a new Application 
+      tags: 
+        - Application
+      requestBody:
+        required: true
+        content: 
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                owner: 
+                  type: string
+              example:
+                name: 'Metabase'
+                owner: '671012480a4d3b5a26c712f3'
+      responses: 
+        201: 
+          content: 
+            application/json: 
+              schema: 
+                type: object
+                properties:
+                  message: 
+                    type: string
+                    example: 'Aplicacion registrada exitosamente'
+                  application:
+                    $ref: '#/components/schemas/Application'
+
+  /application/enable-disable/{id}:
+    patch: 
+      summary: Enable or Disable an Application (Switch State)
+      tags: 
+        - Application
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Application record id in the DB
+          schema: 
+            type: string
+      responses: 
+        200: 
+          content: 
+            application/json: 
+              schema: 
+                type: object
+                properties:
+                  message: 
+                    type: string
+                    example: 'Aplicacion habilitada | deshabilitada exitosamente'
+                  application:
+                    $ref: '#/components/schemas/Application'
+
+  /application/delete/{id}:
+    delete: 
+      summary: Delete an Application (Switch State)
+      tags: 
+        - Application
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Application record id in the DB
+          schema: 
+            type: string
+      responses: 
+        200: 
+          content: 
+            application/json: 
+              schema: 
+                type: object
+                properties:
+                  message: 
+                    type: string
+                    example: 'Aplicacion eliminada exitosamente'
+                  application:
+                    $ref: '#/components/schemas/Application'
+                  
+
   /organization/get/all:
     get: 
       summary: Get All or some Organizations by Query parameters
@@ -1139,7 +1326,7 @@ paths:
                 director: 
                   type: string
               example: 
-                name: 'Briva Internacional S.A. de C.V'
+                name: 'Empresa S.A. de C.V'
                 director: '671012480a4d3b5a26c712f3'
       responses: 
         201:
@@ -1178,7 +1365,7 @@ paths:
                 director: 
                   type: string
               example: 
-                name: 'Briva Internacional S.A. de C.V'
+                name: 'Empresa S.A. de C.V'
                 director: '671012480a4d3b5a26c712f3'
       responses: 
         200:

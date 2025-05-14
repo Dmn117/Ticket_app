@@ -6,6 +6,21 @@ dotenv.config({ path: './src/.env' });
 //! Load  Env
 const env = process.env;
 
+//? Environment
+type Environment = 'development' | 'production';
+
+const Env = (env: string) => {
+    switch (env) {
+        case 'development':
+            return env;
+        case 'production':
+            return env;
+        default:
+            return 'development';
+    }
+};
+
+export const NODE_ENV: Environment = Env(env.NODE_ENV || 'development');
 
 //? Express Server Port
 export const PORT: number = Number(env.PORT) || 3000;

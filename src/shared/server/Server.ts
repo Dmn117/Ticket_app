@@ -13,7 +13,7 @@ import corsConfig from '../config/cors.config';
 import homeRouter from '../../routers/home.router';
 import apiRouterV1 from '../../routers/api.router.v1';
 
-import { FRONTEND_URL, PORT } from '../config/constants';
+import { NODE_ENV, PORT } from '../config/constants';
 import { boomErrorHandler, errorHandler, logErrors, noSuchFileHandler, notFoundHandler } from '../middlewares/error.handler';
 
 class Server {
@@ -66,16 +66,16 @@ class Server {
 
     private tryListen = (port: number): void => {
         this.server.once('listening', () => {
-            console.log(`✔️ Server successfully started at http://localhost:${port}`);
+            console.log(` ✔️Server \x1b[32mstarted at http://localhost:${port}\x1b[0m`);
         });
         
         this.server.once('error', (err: NodeJS.ErrnoException) => {
-            if (err.code === 'EADDRINUSE') {
-                console.log(`❗ Port ${port} is in use, trying another one...`);
+            if (NODE_ENV === 'development' && err.code === 'EADDRINUSE') {
+                console.log(` ❗Port ${port} \x1b[31mis in use.\x1b[0m \x1b[33mTrying another one...\x1b[0m`);
                 this.server.close(() => {this.tryListen(port + 1)});
             }
             else {
-                console.log('❌ Server failed to start: ', err);
+                console.log(' ❌Server \x1b[31mfailed to start\x1b[0m: ', err);
                 process.exit(1);
             }
         });

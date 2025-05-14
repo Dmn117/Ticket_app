@@ -4,6 +4,7 @@ export enum Roles {
     BOSS = 'BOSS',
     DIRECTOR = 'DIRECTOR',
     ADMIN = 'ADMIN',
+    APPLICATION = 'APPLICATION', 
 };
 
 
@@ -111,4 +112,10 @@ export enum TicketNotificationEMail {
     ASIIGNMENT_FOR_AGENT = 'ASIIGNMENT_FOR_AGENT',
     ASSIGNMENT_FOR_AUTHOR = 'ASSIGNMENT_FOR_AUTHOR',
     CLOSING = 'CLOSING'
+};
+
+
+export enum Entities {
+    USER = 'USER',
+    APPLICATION = 'APPLICATION',
 };

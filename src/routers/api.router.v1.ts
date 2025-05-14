@@ -11,6 +11,7 @@ import IncidentRoutes from "../features/incidents/routes/Incident.routes";
 import HelpTopicRoutes from "../features/helpTopics/routes/HelpTopic.routes";
 import DepartmentRoutes from "../features/departments/routes/Department.routes";
 import EvaluationRoutes from "../features/evaluations/routes/Evaluation.routes";
+import ApplicationRoutes from "../features/applications/routes/Application.routes";
 import OrganizationRoutes from "../features/organizations/routes/Organization.routes";
 
 //? Router Declaration
@@ -27,6 +28,7 @@ apiRouterV1.use('/incidence', IncidentRoutes);
 apiRouterV1.use('/help-topic', HelpTopicRoutes);
 apiRouterV1.use('/department', DepartmentRoutes);
 apiRouterV1.use('/evaluation', EvaluationRoutes);
+apiRouterV1.use('/application', ApplicationRoutes);
 apiRouterV1.use('/organization', OrganizationRoutes);
 
 
