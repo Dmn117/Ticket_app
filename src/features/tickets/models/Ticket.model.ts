@@ -1,6 +1,6 @@
 import boom from '@hapi/boom';
 import { JwtPayload } from 'jsonwebtoken';
-import mongoose, { PopulateOptions } from 'mongoose';
+import { Types, PopulateOptions, RootFilterQuery } from 'mongoose';
 
 import User from '../../users/models/User.model';
 import File from '../../files/models/File.model';
@@ -13,6 +13,7 @@ import IUser from '../../users/interfaces/User.interfaces';
 import Transfer from '../../transfers/models/Transfer.model';
 import TicketQueryParams from '../interfaces/TicketQueryParams';
 import HelpTopic from '../../helpTopics/models/HelpTopic.model';
+import Classifier from '../../classifier/models/Classifier.model';
 import Department from '../../departments/models/Department.model';
 import IDepartment from '../../departments/interfaces/Department.interfaces';
 
@@ -20,13 +21,12 @@ import { SentMessageInfo } from 'nodemailer';
 import { USER_TEMPLATE } from '../../../shared/utils/lib/PublicFields';
 import { IMessage } from '../../messages/interfaces/Message.interfaces';
 import { IHelpTopic } from '../../helpTopics/interfaces/HelpTopic.interfaces';
+import { TrainingData } from '../../classifier/interfaces/Classifier.interfaces';
 import { ITransfer, TransferEntry } from '../../transfers/interfaces/Transfer.interfaces';
 import { ITicket, TicketEntry, TicketWithPopulate } from '../interfaces/Ticket.interfaces';
 import { FRONTEND_URL, MIN_TICKET_RATING, SMTP_USER } from '../../../shared/config/constants';
 import { assignedTicketForAgent, assignedTicketForAuthor, ticketClosingTemplate, ticketCreationTemplate } from '../../../shared/config/pages';
 import { ModelsWithCounters, Roles, TicketItems, TicketNotificationEMail, TicketStatus, UserCounters } from '../../../shared/config/enumerates';
-import path from 'path';
-import { populate } from 'dotenv';
 
 
 
@@ -79,7 +79,7 @@ class Ticket {
     };
 
     //? Validate User (Agent) Departments
-    private static validateUserDepartments = async (ticket: ITicket, departments: mongoose.Types.ObjectId[]): Promise<void> => {
+    private static validateUserDepartments = async (ticket: ITicket, departments: Types.ObjectId[]): Promise<void> => {
         if (ticket.assignedTo) {
             const includeDepartments = await User.validateDepartmentsIncluded(
                 ticket.assignedTo.toString(), 
@@ -90,19 +90,19 @@ class Ticket {
                 ticket.assignedTo = null as any;
                 ticket.status = TicketStatus.OPEN;
                 ticket.assignedAt = null as any;
-                this.sendNotificationMail(ticket._id.toString(), TicketNotificationEMail.CREATION);
+                this.sendNotificationMail(ticket._id.toHexString(), TicketNotificationEMail.CREATION);
             }
         }
     };
 
     //? Delete Items (Messages or Files)
     private static deleteItems = async (
-        items: mongoose.Types.ObjectId[], 
+        items: (Types.ObjectId)[], 
         deleteCb: Function
     ): Promise<void> => {
         if (items.length === 0) return;
 
-        const promises: Promise<any>[] = items.map(item => deleteCb(item.toString()));
+        const promises: Promise<any>[] = items.map(item => deleteCb(item._id.toHexString()));
 
         await Promise.allSettled(promises);
     };
@@ -157,7 +157,7 @@ class Ticket {
                 const emails: string = users.map(user => user.email).join(';');
         
                 return await this.sendMail(
-                    `${FRONTEND_URL}tickets/view/${ticket._id.toString()}`,
+                    `${FRONTEND_URL}/tickets/view/${ticket._id.toString()}`,
                     `${ticket.number}`,
                     ticket.title,
                     ticket.helpTopic.name,
@@ -172,7 +172,7 @@ class Ticket {
                 if (!ticket.assignedTo) throw boom.notFound(`No hay usuario asignado al ticket: ${ticket._id}`);
 
                 return await this.sendMail(
-                    `${FRONTEND_URL}tickets/view/${ticket._id.toString()}`,
+                    `${FRONTEND_URL}/tickets/view/${ticket._id.toString()}`,
                     `${ticket.number}`,
                     ticket.title,
                     ticket.helpTopic.name,
@@ -185,7 +185,7 @@ class Ticket {
             
             case TicketNotificationEMail.ASSIGNMENT_FOR_AUTHOR: 
                 return await this.sendMail(
-                    `${FRONTEND_URL}tickets/view/${ticket._id.toString()}`,
+                    `${FRONTEND_URL}/tickets/view/${ticket._id.toString()}`,
                     `${ticket.number}`,
                     ticket.title,
                     ticket.helpTopic.name,
@@ -201,7 +201,7 @@ class Ticket {
                 if (!ticket.assignedTo) throw boom.notFound(`No hay usuario asignado al ticket: ${ticket._id}`);
                 
                 return await this.sendMail(
-                    `${FRONTEND_URL}tickets/view/${ticket._id.toString()}`,
+                    `${FRONTEND_URL}/tickets/view/${ticket._id.toString()}`,
                     `${ticket.number}`,
                     ticket.title,
                     ticket.helpTopic.name,
@@ -223,7 +223,7 @@ class Ticket {
 
 
     //? Find Tickets by Query Parameters
-    public static find = async (params: Partial<TicketQueryParams>): Promise<ITicket[]> => {
+    public static find = async (params: RootFilterQuery<ITicket>): Promise<ITicket[]> => {
         const tickets: ITicket[] = await TicketSchema.find(params);
 
         if (tickets.length === 0) throw boom.notFound('Tickets no encontrados');
@@ -246,12 +246,32 @@ class Ticket {
     };
 
 
+    //? Get Training Data
+    public static getDataTraining = async (params: RootFilterQuery<ITicket>): Promise<TrainingData[]> => {
+        const tickets = await TicketSchema.find(params).populate({ path: 'helpTopic' }) as TicketWithPopulate[];
+
+        return tickets.map(ticket => ({
+            description: ticket.description,
+            label: ticket.helpTopic.classification
+        }));
+    };
+
+
     //? Create a new Ticket
     public static create = async (data: Partial<TicketEntry>): Promise<ITicket> => {
         await this.validations(data);
-        const number: number =  await Counter.getNextSequenceValue(ModelsWithCounters.Ticket);
 
+        const number: number =  await Counter.getNextSequenceValue(ModelsWithCounters.Ticket);
         const ticket: ITicket = await TicketSchema.create({...data, number});
+
+        const classificationRes = await Classifier.classify(ticket.description);
+
+        const classification = Number(classificationRes.classification);
+        const helpTopic = await HelpTopic.findOne({ classification });
+
+        ticket.helpTopic = helpTopic._id;
+
+        await ticket.save();
 
         this.sendNotificationMail(ticket._id.toString(), TicketNotificationEMail.CREATION);
 
@@ -380,7 +400,7 @@ class Ticket {
                 await this.validateUserDepartments(ticket, [department._id]);
 
                 break;
-            
+
             case TicketItems.helpTopic:
                 const helpTopic = validations[0] as IHelpTopic;
 
@@ -490,7 +510,7 @@ class Ticket {
 
         await Promise.allSettled([
             this.deleteItems(ticket.files, File.delete),
-            this.deleteItems(ticket.messages, Message.delete),
+            this.deleteItems((ticket.messages as Types.ObjectId[]), Message.delete),
             this.deleteItems(ticket.transfers, Transfer.delete)
         ]);
 

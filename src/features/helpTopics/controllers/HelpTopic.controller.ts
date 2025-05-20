@@ -1,11 +1,11 @@
+import { RootFilterQuery } from "mongoose";
 import { Request, Response } from "express";
-import HelpTopicQueryParams from "../interfaces/HelpTopicQueryParams";
-import ErrorHandler from "../../../shared/interfaces/ErrorHandler";
-import CustomError from "../../../shared/interfaces/CustomError";
-import { IHelpTopic } from "../interfaces/HelpTopic.interfaces";
-import HelpTopic from "../models/HelpTopic.model";
-import { date } from "joi";
 
+import HelpTopic from "../models/HelpTopic.model";
+import CustomError from "../../../shared/interfaces/CustomError";
+import ErrorHandler from "../../../shared/interfaces/ErrorHandler";
+
+import { IHelpTopic } from "../interfaces/HelpTopic.interfaces";
 
 
 
@@ -14,8 +14,8 @@ class HelpTopicController {
     //! Private
 
     //? Assemeble Query Parameters
-    public static assembleQueryParams = (req: Request): Partial<HelpTopicQueryParams> => {
-        const params: Partial<HelpTopicQueryParams> = {};
+    public static assembleQueryParams = (req: Request): RootFilterQuery<IHelpTopic> => {
+        const params: RootFilterQuery<IHelpTopic> = {};
 
         if (req.query.name) params.name = { $regex: req.query.name.toString(), $options: 'i'};
 
@@ -52,7 +52,7 @@ class HelpTopicController {
     //? Get all or some help topics by Query parameters
     public static getAll = async (req: Request, res: Response, next: ErrorHandler): Promise<void> => {
         try {
-            const params: Partial<HelpTopicQueryParams> = this.assembleQueryParams(req);
+            const params: RootFilterQuery<IHelpTopic> = this.assembleQueryParams(req);
             const helpTopics: IHelpTopic[] = await HelpTopic.find(params);
 
             res.status(200).json({

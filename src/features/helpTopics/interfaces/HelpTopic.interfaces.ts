@@ -1,19 +1,28 @@
-import mongoose, { Document } from "mongoose";
+import { Document, Types } from "mongoose";
 
 
 
-export interface IHelpTopic extends Document {
-    _id: mongoose.Types.ObjectId;
-
+export interface HelpTopicBase {
     name: string;
     expIn: number;
     tags: string[];
     
     enabled: boolean;
 
-    department: mongoose.Types.ObjectId;
+    classification: number;
+    examples: string[];
+    
+    department: string;
+}
+
+
+export interface IHelpTopic extends Document, Omit<HelpTopicBase, 
+    'department'
+> {
+    _id: Types.ObjectId;
+
+    department: Types.ObjectId;
 
     createdAt: Date;
     updatedAt: Date;
 }
-

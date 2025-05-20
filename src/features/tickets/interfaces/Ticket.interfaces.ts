@@ -1,4 +1,4 @@
-import mongoose, { Document } from "mongoose";
+import { Types, Document } from "mongoose";
 
 import IUser from "../../users/interfaces/User.interfaces";
 import IDepartment from "../../departments/interfaces/Department.interfaces";
@@ -7,7 +7,7 @@ import { IHelpTopic } from "../../helpTopics/interfaces/HelpTopic.interfaces";
 import { MessageWithPopulate } from "../../messages/interfaces/Message.interfaces";
 
 export interface ITicket extends Document {
-    _id: mongoose.Types.ObjectId;
+    _id: Types.ObjectId;
 
     title: string;
     description: string;
@@ -20,15 +20,15 @@ export interface ITicket extends Document {
 
     justification: string;
 
-    owner: mongoose.Types.ObjectId;
-    assignedTo: mongoose.Types.ObjectId;
+    owner: Types.ObjectId | IUser;
+    assignedTo: Types.ObjectId | IUser;
 
-    department: mongoose.Types.ObjectId;
-    helpTopic: mongoose.Types.ObjectId;
+    department: Types.ObjectId | IDepartment;
+    helpTopic: Types.ObjectId | IHelpTopic;
     
-    messages: mongoose.Types.ObjectId[];
-    files: mongoose.Types.ObjectId[];
-    transfers: mongoose.Types.ObjectId[];
+    messages: (Types.ObjectId | MessageWithPopulate)[];
+    files: Types.ObjectId[];
+    transfers: Types.ObjectId[];
 
     assignedAt: Date;
     answeredAt: Date;
@@ -73,18 +73,13 @@ export interface TicketEntry {
 }
 
 
-export interface TicketWithPopulate {
-    _id: mongoose.Types.ObjectId;
-
-    title: string;
-    description: string;
-
-    number: number;
-    status: string;
-
-    rating: number;
-    comment: string;
-
+export interface TicketWithPopulate extends Omit<ITicket, 
+    'owner'         | 
+    'assignedTo'    | 
+    'department'    | 
+    'helpTopic'     | 
+    'messages'
+> {
     owner: IUser;
     assignedTo: IUser;
 
@@ -92,13 +87,4 @@ export interface TicketWithPopulate {
     helpTopic: IHelpTopic;
     
     messages: MessageWithPopulate[];
-    files: mongoose.Types.ObjectId[];
-    transfers: mongoose.Types.ObjectId[];
-
-    assignedAt: Date;
-    answeredAt: Date;
-    completedAt: Date;
-
-    createdAt: Date;
-    updateAt: Date;
 }

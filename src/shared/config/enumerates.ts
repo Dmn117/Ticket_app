@@ -1,3 +1,4 @@
+import HelpTopic from '../../features/helpTopics/models/HelpTopic.model';
 export enum Roles {
     USER = 'USER',
     AGENT = 'AGENT',
@@ -36,12 +37,12 @@ export enum TicketItems {
 
 
 export const TicketItemsTranslate = {
-    message : { text: 'Mensaje', end: 'o' },
-    file : { text: 'Archivo', end: 'o' },
-    department : { text: 'Departamento', end: 'o' },
-    transfer : { text: 'Transferencia', end: 'a' },
-    assignedTo : { text: 'Asignacion', end: 'a' },
-    helpTopic : { text: 'Tema de ayuda', end: 'o' },
+    message :       { text: 'Mensaje', end: 'o' },
+    file :          { text: 'Archivo', end: 'o' },
+    department :    { text: 'Departamento', end: 'o' },
+    transfer :      { text: 'Transferencia', end: 'a' },
+    assignedTo :    { text: 'Asignacion', end: 'a' },
+    helpTopic :     { text: 'Tema de ayuda', end: 'o' },
 };
 
 
@@ -82,7 +83,8 @@ export enum MessageAttachmentType {
 
 
 export enum ModelsWithCounters {
-    Ticket = 'Ticket'
+    Ticket = 'Ticket',
+    HelpTopic = 'HelpTopic',
 };
 
 

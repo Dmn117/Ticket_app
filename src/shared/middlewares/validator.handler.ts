@@ -14,7 +14,9 @@ const validatorHandler = (schema: Schema, property: RequestProperties) => {
             next(boom.badRequest(error));
         }
         else {
-            req[property] = value;
+            Object.keys(value).forEach((key) => {
+                req[property as keyof Request][key] = value[key];
+            });
             next();
         }
     };

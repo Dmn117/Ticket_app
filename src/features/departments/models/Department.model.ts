@@ -1,5 +1,5 @@
 import boom from '@hapi/boom';
-import { QueryOptions } from 'mongoose';
+import { QueryOptions, Types } from 'mongoose';
 
 import User from '../../users/models/User.model';
 import DepartmentSchema from "../schemas/Department.schema";
@@ -8,6 +8,7 @@ import DepartmentQueryParams from '../interfaces/DepartmentQueryParams';
 import Organization from '../../organizations/models/Organization.model';
 
 import { USER_TEMPLATE } from '../../../shared/utils/lib/PublicFields';
+import CustomError from '../../../shared/interfaces/CustomError';
 
 
 class Department {
@@ -48,6 +49,16 @@ class Department {
         if (!department) throw boom.notFound('Departamento no encontrado');
 
         return department;
+    };
+
+
+    //? Validate if Department exists
+    public static exists = async (key: keyof IDepartment, value: any, error?: CustomError): Promise<Types.ObjectId> => {
+        const exists = await DepartmentSchema.findOne({ [key]: value });
+
+        if (!exists) throw (error || boom.notFound('Departamento no encontrado'));
+
+        return exists._id;
     };
 
 

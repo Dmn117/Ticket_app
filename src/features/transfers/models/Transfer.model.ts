@@ -1,14 +1,15 @@
 import boom from '@hapi/boom';
+import { RootFilterQuery } from 'mongoose';
 
 import User from "../../users/models/User.model";
+import Ticket from '../../tickets/models/Ticket.model';
 import TransferSchema from "../schemas/Transfer.schemas";
+import HelpTopic from '../../helpTopics/models/HelpTopic.model';
 import Department from "../../departments/models/Department.model";
 
-import HelpTopic from '../../helpTopics/models/HelpTopic.model';
-import Ticket from '../../tickets/models/Ticket.model';
-import TransferQueryParams from '../interfaces/TransferQueryParams';
-
 import { ITransfer, TransferEntry } from "../interfaces/Transfer.interfaces";
+
+
 
 class Transfer {
 
@@ -34,7 +35,7 @@ class Transfer {
     //! Public
 
     //? Find All or Some Transfers by Query Parameters
-    public static find = async (params: Partial<TransferQueryParams>): Promise<ITransfer[]> => {
+    public static find = async (params: RootFilterQuery<ITransfer>): Promise<ITransfer[]> => {
         const transfers: ITransfer[] = await TransferSchema.find(params);
 
         if (transfers.length === 0) throw boom.notFound('Transferencias no encontradas');

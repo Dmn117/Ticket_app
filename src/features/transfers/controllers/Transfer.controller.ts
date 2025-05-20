@@ -1,9 +1,9 @@
+import { RootFilterQuery } from "mongoose";
 import { Request, Response } from "express";
 
 import Transfer from "../models/Transfer.model";
 import CustomError from "../../../shared/interfaces/CustomError";
 import ErrorHandler from "../../../shared/interfaces/ErrorHandler";
-import TransferQueryParams from "../interfaces/TransferQueryParams";
 
 import { ITransfer } from "../interfaces/Transfer.interfaces";
 
@@ -13,8 +13,8 @@ class TransferController {
     //! Private
 
     //? Assemble Query parameters
-    private static assembleQueryParams = (req: Request): Partial<TransferQueryParams> => {
-        const params: Partial<TransferQueryParams> = {};
+    private static assembleQueryParams = (req: Request): RootFilterQuery<ITransfer> => {
+        const params: RootFilterQuery<ITransfer> = {};
 
         if (req.query.ticket) params.ticket = req.query.ticket.toString();
 
@@ -29,7 +29,7 @@ class TransferController {
     //? Get all or some Transfers by query parameters
     public static getAll = async (req: Request, res: Response, next: ErrorHandler): Promise<void> => {
         try {
-            const params: Partial<TransferQueryParams> = this.assembleQueryParams(req);
+            const params: RootFilterQuery<ITransfer> = this.assembleQueryParams(req);
             const transfers: ITransfer[] = await Transfer.find(params);
 
             res.status(200).json({

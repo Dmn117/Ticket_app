@@ -102,3 +102,7 @@ export const DEFAULT_PG_PROFILE: string = 'Personalizado';
 //? Maximum Agent Rating
 export const MIN_AGENT_RATING: number = Number(env.MIN_AGENT_RATING) || 1;
 export const MAX_AGENT_RATING: number = Number(env.MAX_AGENT_RATING) || 10;
+
+
+//? Classifier API URL
+export const CLASSIFIER_API_URL: string = env.CLASSIFIER_API_URL || '';

@@ -1,9 +1,22 @@
-import Joi from "joi";
+import Joi, { AnySchema, Extension, ExtensionFactory, NumberSchema, ObjectSchema, Root, StringSchema } from "joi";
 import mongoose from "mongoose";
 import Regex from "../../config/regex";
 
 
-const objectId = (Joi: Joi.Root) => ({
+interface ExtendedJoi extends Root {
+    rfc: () => StringSchema;
+    email: () => StringSchema;
+    password: () => StringSchema;
+    objectId: () => StringSchema;
+    phoneNumber: () => StringSchema;
+    objectIdList: () => StringSchema;
+    positiveNumber: () => NumberSchema;
+    positiveInteger: () => NumberSchema;
+ }
+
+
+
+const objectId: ExtensionFactory = (Joi: Root) => ({
     type: 'objectId',
     base: Joi.string().empty("").allow(null),
     messages: {
@@ -18,7 +31,7 @@ const objectId = (Joi: Joi.Root) => ({
 });
 
 
-const objectIdList = (Joi: Joi.Root) => ({
+const objectIdList: ExtensionFactory = (Joi: Root) => ({
     type: 'objectIdList',
     base: Joi.string().empty(""),
     messages: {
@@ -38,7 +51,7 @@ const objectIdList = (Joi: Joi.Root) => ({
     }
 });
 
-const object = (Joi: Joi.Root) => ({
+const object: ExtensionFactory = (Joi: Root) => ({
     type: 'object',
     base: Joi.object().unknown(true).empty(["", {}]),
     messages: {
@@ -48,7 +61,7 @@ const object = (Joi: Joi.Root) => ({
 });
 
 
-const string = (Joi: Joi.Root) => ({
+const string: ExtensionFactory = (Joi: Root) => ({
     type: 'string',
     base: Joi.string().empty(""),
     messages: {
@@ -58,19 +71,30 @@ const string = (Joi: Joi.Root) => ({
 });
 
 
-const positiveNumber = (Joi: Joi.Root) => ({
+const positiveNumber: ExtensionFactory = (Joi: Root) => ({
     type: 'positiveNumber',
-    base: Joi.number().min(0).positive().empty(""),
+    base: Joi.number().min(0).empty(""),
     messages: {
         'number.base': '"{{#label}}" debe ser un numero.',
-        'number.positive': '"{{#label}}" debe ser un numero positivo.',
         'number.min': '"{{#label}}" debe ser mayor o igul a {#limit}.',
         'any.required': '"{{#label}}" es obligatorio.'
     }
 });
 
 
-const email = (Joi: Joi.Root) => ({
+const positiveInteger: ExtensionFactory = (Joi: Root) => ({
+    type: 'positiveInteger',
+    base: Joi.number().integer().min(0).empty(""),
+    messages: {
+        'number.base': '"{{#label}}" debe ser un numero.',
+        'number.integer': '"{{#label}}" debe ser un número entero.',
+        'number.min': '"{{#label}}" debe ser mayor o igul a {#limit}.',
+        'any.required': '"{{#label}}" es obligatorio.'
+    }
+});
+
+
+const email: ExtensionFactory = (Joi: Root) => ({
     type: 'email',
     base: Joi.string().email().empty(""),
     messages: {
@@ -82,18 +106,18 @@ const email = (Joi: Joi.Root) => ({
 
 
 
-const password = (Joi: Joi.Root) => ({
+const password: ExtensionFactory = (Joi: Root) => ({
     type: 'password',
     base: Joi.string().pattern(Regex.password).empty(""),
     messages: {
         'string.base': '"{{#label}}" debe ser una cadena de caracteres.',
-        'string.pattern.base': '"{{#label}}" debe contener al mnenos 8 caracteres, 1 mayus, 1 numero y 1 caracter especial',
+        'string.pattern.base': '"{{#label}}" debe contener al menos 8 caracteres, 1 mayuscula, 1 numero y 1 caracter especial',
         'any.required': '"{{#label}}" es obligatorio.'
     }
 });
 
 
-const boolean = (Joi: Joi.Root) => ({
+const boolean: ExtensionFactory = (Joi: Root) => ({
     type: 'boolean',
     base: Joi.boolean().empty(""),
     messages: {
@@ -103,7 +127,7 @@ const boolean = (Joi: Joi.Root) => ({
 });
 
 
-const rfc = (Joi: Joi.Root) => ({
+const rfc: ExtensionFactory = (Joi: Root) => ({
     type: 'rfc',
     base: Joi.string().pattern(/^[A-ZÑ&]{3,4}\d{6}[A-Z\d]{3}?$/).empty(""),
     messages: {
@@ -114,7 +138,7 @@ const rfc = (Joi: Joi.Root) => ({
 });
 
 
-const phoneNumber = (Joi: Joi.Root) => ({
+const phoneNumber: ExtensionFactory = (Joi: Root) => ({
     type: 'phoneNumber',
     base: Joi.string().min(5).pattern(/^\d{10}$/).empty(""),
     messages: {
@@ -125,7 +149,7 @@ const phoneNumber = (Joi: Joi.Root) => ({
 });
 
 
-const array = (Joi: Joi.Root) => ({
+const array: ExtensionFactory = (Joi: Root) => ({
     type: 'array',
     base: Joi.array().empty(""),
     messages: {
@@ -141,8 +165,19 @@ const array = (Joi: Joi.Root) => ({
 });
 
 
-const ExtendedJoi = Joi
+const date: ExtensionFactory = (Joi: Root) => ({
+    type: 'date',
+    base: Joi.date().empty(""),
+    messages: {
+        'date.base': '{{#label}} debe ser una fecha',
+        'any.required': '"{{#label}}" es obligatoria.'
+    }
+});
+
+
+const ExtendedJoi: ExtendedJoi = Joi
     .extend(rfc)
+    .extend(date)
     .extend(email)
     .extend(array)
     .extend(object)
@@ -152,7 +187,8 @@ const ExtendedJoi = Joi
     .extend(objectId)
     .extend(phoneNumber)
     .extend(objectIdList)
-    .extend(positiveNumber);
+    .extend(positiveNumber)
+    .extend(positiveInteger);
 
 
 export default ExtendedJoi;

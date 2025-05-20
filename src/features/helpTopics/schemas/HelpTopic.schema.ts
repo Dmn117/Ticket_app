@@ -25,10 +25,17 @@ const helpTopicSchema: Schema = new Schema<IHelpTopic>(
             type: Boolean,
             default: true
         },
+        classification: {
+            type: Number,
+            required: [true, 'El campo "classification" es requerido']
+        },
+        examples: [{
+            type: String
+        }],
         department: {
             type: Schema.Types.ObjectId,
-            required: [true, 'El campo "department" es requerido'],
-            ref: 'Department'
+            ref: 'Department',
+            required: [true, 'El campo "department" es requerido']
         }
     },
     {
