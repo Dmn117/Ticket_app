@@ -121,7 +121,7 @@ class User {
         let users: IUser[] = [];
 
         if (full) users = await UserSchema.find(params);
-        else users = await UserSchema.find(params, this.publicAttributes);
+        else users = await UserSchema.find(params, this.publicAttributes as any);
 
         if (users.length === 0) throw boom.notFound('Usuarios no encontrados');
 
@@ -134,7 +134,7 @@ class User {
         let user: IUser | null = null;
 
         if (full) user = await UserSchema.findById(id);
-        else user = await UserSchema.findById(id, this.publicAttributes);
+        else user = await UserSchema.findById(id, this.publicAttributes as any);
 
         if (!user) throw boom.notFound('Usuario no encontrado');
 
@@ -147,7 +147,7 @@ class User {
         let user: IUser | null = null;
 
         if (full) user = await UserSchema.findOne({ email });
-        else user = await UserSchema.findOne({ email }, this.publicAttributes);
+        else user = await UserSchema.findOne({ email }, this.publicAttributes as any);
 
         if (!user) throw boom.notFound('Usuario no encontrado');
 
@@ -188,9 +188,11 @@ class User {
 
 
     //? Create a new User
-    public static create = async (data: IUser): Promise<Partial<IUser>> => {
+    public static create = async (data: Partial<IUser>): Promise<Partial<IUser>> => {
         await this.validations(data);
 
+        if (!data.password) data.password = generateVerificationCode(14);
+        
         const password: string = await this.generatePassword(data.password);
         const codeExpirationDate: Date = calculateCodeExirationDate(VCODE_FIRST_EXP);
 

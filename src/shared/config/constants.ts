@@ -106,3 +106,11 @@ export const MAX_AGENT_RATING: number = Number(env.MAX_AGENT_RATING) || 10;
 
 //? Classifier API URL
 export const CLASSIFIER_API_URL: string = env.CLASSIFIER_API_URL || '';
+
+//? Admin User
+export const ADMIN_DEFAULT_EMAIL = 'admin@admin.com';
+
+export const ADMIN_FIRST_NAME: string = env.ADMIN_FIRST_NAME || 'Admin';
+export const ADMIN_LAST_NAME: string = env.ADMIN_LAST_NAME || 'User';
+export const ADMIN_EMAIL: string = env.ADMIN_EMAIL || ADMIN_DEFAULT_EMAIL;
+export const ADMIN_PASSWORD: string = env.ADMIN_PASSWORD || 'root@1234';

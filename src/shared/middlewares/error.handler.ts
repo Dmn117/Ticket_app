@@ -18,7 +18,6 @@ export const logErrors = (err: Error, req: Request, res: Response, next: ErrorHa
 export const boomErrorHandler = (err: Error, req: Request, res: Response, next: ErrorHandler): void => {
     if (isBoom(err)) {
         const { output } = err;
-        console.log(output);
         res.status(output.statusCode).json(output.payload);
     } else {
         next(err);

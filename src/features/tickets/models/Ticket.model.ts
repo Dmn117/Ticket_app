@@ -49,6 +49,16 @@ class Ticket {
         }
     ];
 
+    //? Execute callbacks in asyncronus and controlled way
+    private static async executeCallback(callback: Function): Promise<void> {
+        try {
+            await callback();
+        }
+        catch (error) {
+            console.log(`Error executing callback: ${error}`);
+        }
+    }
+
     //? Validate Data and References
     private static validations = async (data: Partial<TicketEntry>): Promise<any[]> => {
         const promises: Promise<any>[] = [];
@@ -90,7 +100,10 @@ class Ticket {
                 ticket.assignedTo = null as any;
                 ticket.status = TicketStatus.OPEN;
                 ticket.assignedAt = null as any;
-                this.sendNotificationMail(ticket._id.toHexString(), TicketNotificationEMail.CREATION);
+                
+                this.executeCallback(
+                    () => this.sendNotificationMail(ticket._id.toHexString(), TicketNotificationEMail.CREATION)
+                );
             }
         }
     };
@@ -273,7 +286,9 @@ class Ticket {
 
         await ticket.save();
 
-        this.sendNotificationMail(ticket._id.toString(), TicketNotificationEMail.CREATION);
+        this.executeCallback(
+            this.sendNotificationMail.bind(this, ticket._id.toHexString(), TicketNotificationEMail.CREATION)
+        );
 
         return ticket;
     };
@@ -316,7 +331,9 @@ class Ticket {
         if ([TicketStatus.CANCELED, TicketStatus.CLOSED].includes(data.status as TicketStatus)) {
             promises.push(User.increaseCounter(ticket.assignedTo.toString(), UserCounters.closedTickets));
             ticket.completedAt = new Date(Date.now());
-            this.sendNotificationMail(ticket._id.toString(), TicketNotificationEMail.CLOSING);
+            this.executeCallback(
+                () => this.sendNotificationMail(ticket._id.toString(), TicketNotificationEMail.CLOSING)
+            );
         }
 
         promises.push(ticket.save());
@@ -425,8 +442,12 @@ class Ticket {
         await ticket.save();
 
         if (type === TicketItems.assignedTo) {
-            this.sendNotificationMail(ticketId, TicketNotificationEMail.ASIIGNMENT_FOR_AGENT);
-            this.sendNotificationMail(ticketId, TicketNotificationEMail.ASSIGNMENT_FOR_AUTHOR);
+            this.executeCallback(
+                () => {
+                    this.sendNotificationMail(ticketId, TicketNotificationEMail.ASIIGNMENT_FOR_AGENT),
+                    this.sendNotificationMail(ticketId, TicketNotificationEMail.ASSIGNMENT_FOR_AUTHOR)
+                }
+            );
         }
 
         return ticket;
