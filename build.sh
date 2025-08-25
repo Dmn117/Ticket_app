@@ -24,8 +24,8 @@ tsc
 
 
 echo -e "${BLUE}🔑 Copying keys...${NC}"
-cp ./src/private.pem ./dist
-cp ./src/public.pem ./dist
+cp ./keys/private.pem ./dist
+cp ./keys/public.pem ./dist
 
 
 echo -e "${BLUE}📚 Copying documentation...${NC}"
