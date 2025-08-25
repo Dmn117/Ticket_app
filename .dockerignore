@@ -1,0 +1,15 @@
+node_modules/
+
+src/
+
+uploads/
+
+temp/
+
+db/
+
+js/
+
+.vscode/
+
+docker-compose.yml

@@ -1,0 +1,63 @@
+services:
+  tickets_mongo:
+    image: mongo:latest
+    container_name: tickets_mongo
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
+    ports:
+      - "27017:27017"
+    volumes:
+      - tickets_mongo:/data/db
+    networks:
+      - ticket_app
+  
+
+  ticket_classifier:
+    image: manrp/ticket_classifier:latest
+    container_name: ticket_classifier
+    restart: always
+    env_file: .env
+    networks:
+      - ticket_app
+    ports:
+      - "5000:5000"
+
+
+  tickets_backend:
+    image: manrp/tickets_backend:latest
+    container_name: tickets_backend
+    restart: always
+    env_file: .env
+    networks:
+      - ticket_app
+    depends_on:
+      - tickets_mongo
+    ports:
+      - "3000:3000"
+    volumes:
+      - tickets_backend:/tickets_backend/uploads
+      - tickets_backend:/tickets_backend/temp
+
+
+  tickets_frontend:
+    image: manrp/tickets_frontend:latest
+    container_name: tickets_frontend
+    restart: always
+    networks:
+      - ticket_app
+    depends_on:
+      - tickets_backend
+    ports:
+      - "80:80"
+
+
+volumes: 
+  tickets_mongo:
+  tickets_backend:
+
+
+networks:
+  ticket_app:
+    driver: bridge
