@@ -275,16 +275,19 @@ class Ticket {
         await this.validations(data);
 
         const number: number =  await Counter.getNextSequenceValue(ModelsWithCounters.Ticket);
-        const ticket: ITicket = await TicketSchema.create({...data, number});
 
-        const classificationRes = await Classifier.classify(ticket.description);
+        if (!data.description) 
+            throw boom.badRequest('No se puede Clasificar un Ticket sin descripción');
+        
+        const classificationRes = await Classifier.classify(data.description);
 
         const classification = Number(classificationRes.classification);
         const helpTopic = await HelpTopic.findOne({ classification });
 
-        ticket.helpTopic = helpTopic._id;
+        data.helpTopic = helpTopic._id.toHexString();
+        data.department = helpTopic.department._id.toHexString();
 
-        await ticket.save();
+        const ticket: ITicket = await TicketSchema.create({...data, number});
 
         this.executeCallback(
             this.sendNotificationMail.bind(this, ticket._id.toHexString(), TicketNotificationEMail.CREATION)

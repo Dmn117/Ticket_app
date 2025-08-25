@@ -6,8 +6,8 @@
   "scripts": {
     "test": "jest src/",
     "dev": "nodemon",
-    "build": "rimraf ./dist && tsc",
-    "start": "npm run build && node dist/app.js",
+    "build": "bash build.sh",
+    "start": "node src/app.js",
     "generate-feature": "node CLI.js feature:generate",
     "delete-feature": "node CLI.js feature:delete"
   },

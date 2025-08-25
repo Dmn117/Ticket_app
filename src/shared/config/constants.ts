@@ -64,8 +64,8 @@ export const FILE_NOT_FOUND: string = `./src/shared/assets/img/fileNotFound.png`
 export const USER_IMG: string = `./src/shared/assets/img/default.user.png`; 
 
 //? Public
-export const BG_1_PAGE: string = `http://${SERVER}:${PORT}/assets/img/bg1.jpg`;
-export const FAVICON: string = `http://${SERVER}:${PORT}/assets/ico/favicon.ico`;
+export const BG_1_PAGE: string = `http://${SERVER}/assets/img/bg1.jpg`;
+export const FAVICON: string = `http://${SERVER}/assets/ico/favicon.ico`;
 
 //? Swagger
 export const SWAGGER_YML: string = './src/documentation/swagger.yml';

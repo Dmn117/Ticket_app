@@ -1,13 +1,15 @@
-/.vscode
+.vscode/
 
-/node_modules
+node_modules/
 
-/dist
+dist/
 
-/build
+build/
 
-/request
+request/
 
-/temp
+temp/
+
+js/
 
 *.env

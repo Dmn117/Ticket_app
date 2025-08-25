@@ -53,8 +53,8 @@ export const createTicketSchema = Joi.object({
     title: title.required(),
     description: description.required(),
     owner: id.required(),
-    department: id.required(),
-    helpTopic,
+    department: id,
+    helpTopic: id,
 });
 
 

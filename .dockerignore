@@ -1,13 +1,15 @@
-/node_modules
+node_modules/
 
-/src
+src/
 
-/uploads
+uploads/
 
-/temp
+temp/
 
-/db
+db/
 
-/.vscode
+js/
+
+.vscode/
 
 docker-compose.yml

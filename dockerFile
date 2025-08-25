@@ -1,11 +1,12 @@
-FROM node:20.11.1
+FROM node:20-alpine
 
 WORKDIR /tickets_backend
 
 COPY package*.json ./
 
 COPY ./dist ./src
-COPY ./src/.env.example ./src/.env
+
+COPY ./LICENSE ./
 
 RUN npm install --only=production
 

@@ -2,8 +2,8 @@ import { model, Schema } from "mongoose";
 
 import IUser from "../interfaces/User.interfaces";
 import { Roles } from "../../../shared/config/enumerates";
-import { VCODE_FIRST_EXP, VCODE_LENGTH } from "../../../shared/config/constants";
-import { generateVerificationCode, calculateCodeExirationDate } from "../../../shared/utils/lib/VerificationCode";
+import { VCODE_LENGTH } from "../../../shared/config/constants";
+import { generateVerificationCode } from "../../../shared/utils/lib/VerificationCode";
 
 
 const schema: Schema = new Schema<IUser>(
