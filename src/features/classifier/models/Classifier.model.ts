@@ -80,7 +80,7 @@ class Classifier {
 
     public static automaticTraining = async (): Promise<void> => {
         try {
-            this.automaticTrainingSync();
+            await this.automaticTrainingSync();
         }
         catch (error) {
             console.log('Error entrenando el modelo', error);
