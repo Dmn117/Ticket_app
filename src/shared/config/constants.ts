@@ -68,9 +68,8 @@ export const BG_1_PAGE: string = `http://${SERVER}/assets/img/bg1.jpg`;
 export const FAVICON: string = `http://${SERVER}/assets/ico/favicon.ico`;
 
 //? Swagger
-export const SWAGGER_YML: string = './src/documentation/swagger.yml';
 export const SWAGGER_THEME_MATERIAL: string = './src/documentation/swagger-theme-material.css';
-
+export const OPEN_API_YML: string = './src/documentation/open.api.yml';
 
 //? Verification Code
 export const VCODE_LENGTH: number = Number(env.VCODE_LENGTH) || 5;
@@ -106,6 +105,7 @@ export const MAX_AGENT_RATING: number = Number(env.MAX_AGENT_RATING) || 10;
 
 //? Classifier API URL
 export const CLASSIFIER_API_URL: string = env.CLASSIFIER_API_URL || '';
+export const MONTHS_OF_TRAINING_DATA: number = Number(env.MONTHS_OF_TRAINING_DATA) || 3;
 
 //? Admin User
 export const ADMIN_DEFAULT_EMAIL = 'admin@admin.com';

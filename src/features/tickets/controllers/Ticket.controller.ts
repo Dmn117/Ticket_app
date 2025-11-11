@@ -128,6 +128,30 @@ class TicketController {
         }
     };
 
+
+    public static createInBulk = async (req: Request, res: Response, next: ErrorHandler): Promise<void> => {
+        try {
+            const { body } = req;
+            const tickets = await Ticket.createInBulk(body);
+
+            if (tickets.find(item => item.status === 'fulfilled')) {
+                res.status(201).json({
+                    message: 'Tickets registrados',
+                    tickets
+                });
+            }
+            else {
+                res.status(400).json({
+                    message: 'Tickets no registrados, favor de validar los datos de entrada',
+                    tickets
+                });
+            }
+        }
+        catch (error) {
+            next(error as CustomError);
+        }
+    };
+
     
     //! PUT Methods
 

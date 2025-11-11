@@ -8,11 +8,12 @@ import '../config/cron.config';
 import mongo from '../config/mongo';
 import Socket from '../socket/Socket';
 import passport from '../utils/auth/index';
-import swagger from '../middlewares/swagger';
 import corsConfig from '../config/cors.config';
 import homeRouter from '../../routers/home.router';
 import apiRouterV1 from '../../routers/api.router.v1';
+import Classifier from '../../features/classifier/models/Classifier.model';
 
+import openAPI from '../middlewares/open.api.documentation';
 import { NODE_ENV, PORT } from '../config/constants';
 import { boomErrorHandler, errorHandler, logErrors, noSuchFileHandler, notFoundHandler } from '../middlewares/error.handler';
 
@@ -25,11 +26,11 @@ class Server {
         this.server = createServer(this.app);
     }
 
-    private middlewares = (): void => {
+    private middlewares = async (): Promise<void> => {
         // Midlewares
 
         // Helmet
-        this.app.use(helmet());
+        // this.app.use(helmet());
 
         // Cors Configure
         this.app.use(cors(corsConfig));
@@ -44,7 +45,10 @@ class Server {
         this.app.use(express.json());
 
         // Database Connection
-        mongo();
+        await mongo();
+
+        //? Classification Models
+        Classifier.automaticTraining();
 
         // Router
         this.app.use('', homeRouter);
@@ -53,8 +57,8 @@ class Server {
         // Socket IO
         Socket.initSocket(this.server);
 
-        // Documentation
-        swagger(this.app);
+        //? Documentation
+        await openAPI(this.app);
 
         // Error Control
         this.app.use(logErrors);
@@ -83,8 +87,8 @@ class Server {
         this.server.listen(port);
     };
 
-    public run = (): void => {
-        this.middlewares();
+    public run = async (): Promise<void> => {
+        await this.middlewares();
 
         this.tryListen(PORT);
     };

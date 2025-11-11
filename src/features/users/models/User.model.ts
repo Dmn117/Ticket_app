@@ -84,7 +84,7 @@ class User {
         
 
         const response = await SMTP.send({
-            from: `Whatever 😎" <${SMTP_USER}>`,
+            from: `MasteryTickets 😎" <${SMTP_USER}>`,
             to: email,
             subject: 'Confirmación de cuenta | Tickets',
             html
@@ -284,7 +284,7 @@ class User {
             .replace('{{expiresIn}}', `${VCODE_EXP}`)
         
         const response = await SMTP.send({
-            from: `Whatever 😎" <${SMTP_USER}>`,
+            from: `MasteryTickets 😎" <${SMTP_USER}>`,
             to: user.email,
             subject: 'Código de verificación | Tickets',
             html

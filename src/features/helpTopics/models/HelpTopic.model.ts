@@ -39,15 +39,6 @@ class HelpTopic {
     };
 
 
-    private static train = async (): Promise<void> => {
-        try {
-            await Classifier.train();
-        }
-        catch(error) {
-            console.log(`Error al entrenar el modelo: ${error}`);
-        }
-    };
-
     //! Public
 
     //? Find All or some Help Topics by Query Parameters
@@ -94,7 +85,7 @@ class HelpTopic {
 
         const helpTopic: IHelpTopic = await HelpTopicSchema.create({ ...data, classification });
         
-        this.train();
+        Classifier.automaticTraining();
 
         return helpTopic;
     };
@@ -111,7 +102,7 @@ class HelpTopic {
 
         if (!helpTopic) throw boom.notFound('Tema de ayuda no encontrado');
 
-        if (data.examples) this.train();
+        if (data.examples) Classifier.automaticTraining();
 
         return helpTopic;
     };
@@ -120,7 +111,7 @@ class HelpTopic {
     public static enableDisable = async (id: string, enabled: boolean): Promise<IHelpTopic> => {
         const helpTopic: IHelpTopic = await this.update(id, { enabled });
 
-        this.train();
+        Classifier.automaticTraining();
 
         return helpTopic;
     };

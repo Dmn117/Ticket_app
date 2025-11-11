@@ -1,0 +1,3542 @@
+openapi: 3.0.0
+info: 
+  title: MasteryTickets
+  version: 1.0.0
+  contact: 
+    name: API Support
+    email: juanromerojohn.117@gmail.com
+
+    
+servers: 
+  - url: /api/v1
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+
+    User:
+      type: object
+      properties:
+        _id: 
+          type: string
+        firstName: 
+          type: string
+        lastName: 
+          type: string
+        email: 
+          type: string
+        role: 
+          type: string
+        specialPermissions:
+          type: array
+          items:  
+            type: string
+        rating:   
+          type: number
+        evaluatedTickets:
+          type: number
+        closedTickets:
+          type: number
+        reporter: 
+          type: boolean
+        validated: 
+          type: boolean
+        enabled: 
+          type: boolean
+        avatar: 
+          type: string
+        boss: 
+          type: string
+        departments:
+          type: array
+          items: 
+            type: string
+        cretedAt: 
+          type: Date
+        updatedAt: 
+          type: Date
+      example:
+        _id: 671012480a4d3b5a26c712f3
+        firstName: Joe
+        lastName: Doe
+        email: joedoe@example.com
+        role: AGENT
+        specialPermissions:
+          - 'userRegistration'
+        rating: 4.5
+        evaluatedTickets: 10
+        closedTickets: 11
+        reporter: false
+        validated: false
+        enabled: true
+        avatar: 67101248014d3b5f26a712f1
+        boss: 6710124c014d3baf26a882f2
+        departments: 
+          - 67101248014d3b5f26a712f1
+          - 671012c4514dab5126adb2f2
+        createdAt: 2024-10-16T20:30:00.501+00:00
+        updatedAt: 2024-10-16T20:30:00.501+00:00
+  
+
+    EmailResponse:
+      type: object
+      properties:
+        accepted:
+          type: array
+          items:
+            type: string
+        rejected:
+          type: array
+          items:
+            type: string
+        ehlo:
+          type: array
+          items:
+            type: string
+        envelopeTime:
+          type: number
+        messageTime:
+          type: number
+        messageSize:
+          type: number
+        response:
+          type: string
+        envelope: 
+          type: object
+          properties:
+            from:
+              type: string
+            to:
+              type: array
+              items:
+                type: string
+        messageId:
+          type: string
+      example:
+        accepted: 
+          - accepted@example.com
+        rejected:
+          - rejected@example.com
+        ehlo:
+          - SIZE 52428800
+          - 8BITMIME
+          - PIPELINING
+          - PIPECONNECT
+          - AUTH PLAIN LOGIN
+          - HELP
+        envelopeTime: 349
+        messageTime: 230
+        messageSize: 1790
+        response: 250 OK id=4zH5VS-0002GR-3B
+        envelope:
+          from: from@example.com
+          to: 
+            - accepted@example.com
+            - rejected@example.com
+        messageId: <860b5b7a-71ca-ec2s-e4e3-1cbbf2x97f32@example.com.mx>
+    
+
+    Organization:
+      type: object
+      properties:
+        _id: 
+          type: string
+        name: 
+          type: string
+        enabled:
+          type: boolean
+        director: 
+          type: object
+          $ref: '#/components/schemas/User'
+        cretedAt: 
+          type: Date
+        updatedAt: 
+          type: Date
+      example: 
+        _id: 6710124a014f3bcc26a122f8
+        name: 'Empresa S.A. de C.V'
+        enabled: true
+        director: 
+          _id: 671012480a4d3b5a26c712f3
+          firstName: Joe
+          lastName: Doe
+          email: joedoe@example.com
+          role: USER
+          reporter: false
+          validated: false
+          enabled: true
+          avatar: 67101248014d3b5f26a712f1
+          boss: 6710124c014d3baf26a882f2
+          createdAt: 2024-10-16T20:30:00.501+00:00
+          updatedAt: 2024-10-16T20:30:00.501+00:00
+        createdAt: 2024-10-16T20:30:00.501+00:00
+        updatedAt: 2024-10-16T20:30:00.501+00:00
+
+
+    Department:
+      type: object
+      properties:
+        _id: 
+          type: string
+        name: 
+          type: string
+        enabled:
+          type: boolean
+        organization:
+          type: string
+        owner: 
+          type: object
+          $ref: '#/components/schemas/User'
+        cretedAt: 
+          type: Date
+        updatedAt: 
+          type: Date
+      example: 
+        _id: 6710124a014f3bcc26a122f8
+        name: 'IT'
+        enabled: true
+        organization: 6710124a014f3bcc26a122f8
+        owner: 
+          _id: 671012480a4d3b5a26c712f3
+          firstName: Joe
+          lastName: Doe
+          email: joedoe@example.com
+          role: USER
+          reporter: false
+          validated: false
+          enabled: true
+          avatar: 67101248014d3b5f26a712f1
+          boss: 6710124c014d3baf26a882f2
+          createdAt: 2024-10-16T20:30:00.501+00:00
+          updatedAt: 2024-10-16T20:30:00.501+00:00
+        createdAt: 2024-10-16T20:30:00.501+00:00
+        updatedAt: 2024-10-16T20:30:00.501+00:00
+
+
+    File: 
+      type: object
+      properties:
+        _id:
+          type: string
+        path:
+          type: string
+        owner: 
+          type: string
+        createdAt:
+          type: Date
+        updatedAt:
+          type: Date
+      example:
+        _id: 6670786607b3ed45bd4405c7
+        path: 'uploads\folder\6670786607b3ed45bd4405c.type'
+        owner: 671012480a4d3b5a26c712f3
+        createdAt: 2024-05-22T15:01:03.978Z
+        updatedAt: 2024-05-30T16:38:39.620Z
+
+
+    Ticket:
+      type: object
+      properties:
+        _id: 
+          type: string
+        title: 
+          type: string
+        description: 
+          type: string
+        number: 
+          type: number
+        status: 
+          type: string
+        rating:
+          type: number
+        comment:
+          type: string
+        owner: 
+          type: string
+        assignedTo: 
+          type: string
+        department: 
+          type: string
+        helpTopic: 
+          type: string
+        messages: 
+          type: array
+          items: string
+        files: 
+          type: array
+          items: string
+        transfers: 
+          type: array
+          items: string
+        assignedAt: 
+          type: Date
+        answeredAt: 
+          type: Date
+        completedAt: 
+          type: Date
+        cretedAt: 
+          type: Date
+        updatedAt: 
+          type: Date
+      example: 
+        _id: 6710124a014f3bcc26a122f8
+        title: 'Problemas con internet'
+        description: 'Al encender mi laptop no se conecta al internet por wifi'
+        number: 5
+        status: 'CLOSED'
+        rate: 4
+        comment: 'Excelente resolucion, pero demoro al responder'
+        owner: 6670786607b3ed45bd4405c7
+        assignedTo: 6710124c014d3baf26a882f2
+        department: 6710124ac1412baf26a8c2d3
+        helpTopic: 67201d7415d0a63ab50aac05
+        messages:
+          - 67201d8fad157e76705f684c
+          - 67201d940d51004a767a0072
+        files: 
+          -67201db1fc52ad8c90c07356
+        transfers:
+          - 67201dcd027a4e57366cfcea
+        assignedAt: 2024-10-16T20:30:00.501+00:00
+        answeredAt: 2024-10-16T20:30:00.501+00:00
+        completedAt: 2024-10-16T20:30:00.501+00:00
+        createdAt: 2024-10-16T20:30:00.501+00:00
+        updatedAt: 2024-10-16T20:30:00.501+00:00
+
+
+    HelpTopic:
+      type: object
+      properties:
+        _id: 
+          type: string
+        name: 
+          type: string
+        expIn: 
+          type: number
+        tags: 
+          type: array
+          items:
+            type: string
+        enabled:
+          type: boolean
+        department:
+          type: string
+        cretedAt: 
+          type: Date
+        updatedAt: 
+          type: Date
+      example: 
+        _id: 6710124a014f3bcc26a122f8
+        name: 'Instalacion de Aplicacion'
+        expIn: 60
+        tags: 
+          - 'Software'
+          - 'Aplicaciones'
+          - 'Programas'
+        enabled: true
+        department: 6710124a014f3bcc26a122f8
+        createdAt: 2024-10-16T20:30:00.501+00:00
+        updatedAt: 2024-10-16T20:30:00.501+00:00
+
+  
+    Message:
+      type: object
+      properties:
+        _id: 
+          type: string
+        text: 
+          type: string
+        visibility: 
+          type: string
+        isEdited:
+          type: boolean
+        previousTexts:
+          type: array
+          items:
+            type: string
+        attachment:
+          type: string
+        attachmentType:
+          type: string 
+        owner:
+          type: string         
+        cretedAt: 
+          type: Date
+        updatedAt: 
+          type: Date
+      example: 
+        _id: 6710124a014f3bcc26a122f8
+        text: 'Hola, Respondo en un momento'
+        visibility: 'TO_ALL'
+        isEdited: false
+        previousTexts: 
+          - 'Hola'
+        attachment: 67201db1fc52ad8c90c07356
+        attachmentType: 'IMAGE'
+        owner: 671012480a4d3b5a26c712f3
+        createdAt: 2024-10-16T20:30:00.501+00:00
+        updatedAt: 2024-10-16T20:30:00.501+00:00
+
+
+    Transfer:
+      type: object
+      properties:
+        _id: 
+          type: string
+        nextDepartment:
+          type: string
+        nextAssigned:
+          type: string
+        nextHelpTopic:
+          type: string
+        preDepartment:
+          type: string
+        preAssigned:
+          type: string
+        preHelpTopic:
+          type: string
+        ticket:
+          type: string
+        cretedAt: 
+          type: Date
+        updatedAt: 
+          type: Date
+      example: 
+        _id: 6725530984e008b4efe181f4
+        nextDepartment: 6710124a014f3bcc26a122f8
+        nextAssigned: 672552ede0dd3ce2fe1f6930
+        nextHelpTopic: 672552f4c1ad14363388c81c
+        preDepartment: 6710124a818f32ca26a123c7
+        preAssigned: 672552f8cf9c97b5c74d223b
+        preHelpTopic: 672552fc5d48c2c55d595ff3
+        ticket: 672553012cdcfa7091732736
+        createdAt: 2024-10-16T20:30:00.501+00:00
+        updatedAt: 2024-10-16T20:30:00.501+00:00
+
+  
+    Incidence: 
+      type: object
+      properties:
+        _id: 
+          type: string
+        title: 
+          type: string
+        description: 
+          type: string
+        severity: 
+          type: number
+        author:
+          type: string
+        agent: 
+          type: string
+        createdAt:
+          type: Date
+        updatedAt:
+          type: Date
+      example: 
+        _id: 6725530984e008b4efe181f4
+        title: Retardo de 18 minutos
+        description: Checo entrada 3 minutos después de la máxima tolerancia de 15 min, 08:18 am
+        severity: 5
+        author: 672552ede0dd3ce2fe1f6930
+        agent: 672552f8cf9c97b5c74d223b
+        createdAt: 2024-10-16T20:30:00.501+00:00
+        updatedAt: 2024-10-16T20:30:00.501+00:00
+
+
+    Evaluation:
+      type: object
+      properties:
+        _id: 
+          type: string
+        rate: 
+          type: number
+        comments: 
+          type: string
+        rated: 
+          type: boolean
+        month:
+          type: number
+        year: 
+          type: number
+        agent: 
+          type: string
+        evaluator: 
+          type: string
+        createdAt:
+          type: Date
+        updatedAt:
+          type: Date
+      example:
+        _id: 6725530984e008b4efe181f4
+        rate: 60
+        comments: Demasiados Retardos dentro del mes
+        rated: true
+        month: 12
+        year: 2024
+        agent: 672552f8cf9c97b5c74d223b
+        evaluator: 672552ede0dd3ce2fe1f6930
+        createdAt: 2024-10-16T20:30:00.501+00:00
+        updatedAt: 2024-10-16T20:30:00.501+00:00
+
+
+    Application: 
+      type: object
+      properties:
+        _id:
+          type: string
+        name: 
+          type: string
+        enabled: 
+          type: boolean
+        owner: 
+          $ref: '#/components/schemas/User'
+        createdAt:
+          type: Date
+        updatedAt:
+          type: Date
+      example:
+        _id: 6710124c014d3baf26a882f2
+        name: Metabase
+        enabled: true
+        owner: 
+          _id: 671012480a4d3b5a26c712f3
+          firstName: Joe
+          lastName: Doe
+          email: joedoe@example.com
+          role: AGENT
+          specialPermissions:
+            - 'userRegistration'
+          rating: 4.5
+          evaluatedTickets: 10
+          closedTickets: 11
+          reporter: false
+          enabled: true
+          avatar: 67101248014d3b5f26a712f1
+          boss: 6710124c014d3baf26a882f2
+          departments: 
+            - 67101248014d3b5f26a712f1
+            - 671012c4514dab5126adb2f2
+          createdAt: 2024-10-16T20:30:00.501+00:00
+          updatedAt: 2024-10-16T20:30:00.501+00:00
+
+        
+
+security:
+  - BearerAuth: []
+
+paths:
+
+  /user/get/all:
+    get:
+      summary: Retrieve Users by query parameters
+      tags: 
+        - User
+      parameters:
+        - name: firstName
+          in: query
+          required: false
+          description: User First Name
+          schema: 
+            type: string
+        - name: lastName
+          in: query
+          required: false
+          description: User Last Name
+          schema: 
+            type: string
+        - name: email
+          in: query
+          required: false
+          description: User Email
+          schema: 
+            type: string
+        - name: includesRoles
+          in: query
+          required: false
+          description: Whether to include or exclude roles in the search
+          schema: 
+            type: boolean
+        - name: role
+          in: query
+          required: false
+          description: User Role
+          schema: 
+            type: string
+        - name: reporter
+          in: query
+          required: false
+          description: If Users are reporters
+          schema: 
+            type: boolean
+        - name: validated
+          in: query
+          required: false
+          description: If Users are validated
+          schema: 
+            type: boolean
+        - name: enabled
+          in: query
+          required: false
+          description: Retrieve only enabled or disabled
+          schema:
+            type: boolean
+        - name: boss
+          in: query
+          required: false
+          description: User Boss Id
+          schema: 
+            type: string
+        - name: includesDepartments
+          in: query
+          required: false
+          description: Whether to include or exclude departments in the search
+          schema: 
+            type: boolean
+        - name: departments
+          in: query
+          required: false
+          description: Departments to which user belongs (Mongo _ids)
+          schema: 
+            type: string
+        - name: ratingLte
+          in: query
+          required: false
+          description: Ratings less than or equal to
+          schema: 
+            type: number
+        - name: ratingGte
+          in: query
+          required: false
+          description: Ratings greater than or equal to
+          schema: 
+            type: number
+      responses: 
+        200: 
+          content: 
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  message: 
+                    type: string
+                    example: 'Usuarios recuperados exitosamente'
+                  users:
+                    type: array
+                    items: 
+                      $ref: '#/components/schemas/User'
+  
+  /user/get/id/{id}: 
+    get: 
+      summary: Retrieve User by ID
+      tags: 
+        - User
+      parameters: 
+        - name: id
+          in: path
+          required: true
+          description: User record id in the DB
+          schema: 
+            type: string
+      responses: 
+        200: 
+          content: 
+            application/json: 
+              schema: 
+                type: object
+                properties:
+                  message: 
+                    type: string
+                    example: 'Usuario recuperado exitosamente'
+                  user:
+                    $ref: '#/components/schemas/User'
+
+  /user/login:
+    post: 
+      summary: Login User and Generate Access Token
+      tags: 
+        - User
+      requestBody:
+        required: true
+        content:
+          application/json: 
+            schema: 
+              type: object
+              properties:
+                email: 
+                  type: string
+                password: 
+                  type: string
+              example: 
+                email: joedoe@example.com
+                password: '12345678'
+      responses: 
+        200: 
+          content: 
+            application/json: 
+              schema: 
+                type: object
+                properties:
+                  message: 
+                    type: string
+                    example: 'Usuario inicio sesion exitosamente'
+                  user: 
+                    $ref: '#/components/schemas/User'
+                  token:
+                    type: string
+                    example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c'
+
+  /user/create:
+    post: 
+      summary: Create a new User Record in the DB
+      tags: 
+        - User
+      requestBody:
+        required: true
+        content:
+          application/json: 
+            schema:
+              type: object
+              properties:
+                firstName: 
+                  type: string
+                lastName: 
+                  type: string
+                email: 
+                  type: string
+                password: 
+                  type: string
+                role: 
+                  type: string
+                specialPermissions:
+                  type: array
+                  items: 
+                    type: string
+                reporter: 
+                  type: boolean
+                avatar: 
+                  type: string
+                boss:
+                  type: string
+                departments:
+                  type: array
+                  items: 
+                    type: string
+              example:
+                firstName: Joe
+                lastName: Doe
+                email: joedoe@example.com
+                password: 123abc
+                role: 'USER'
+                specialPermissions:
+                  - 'userRegistration'
+                reporter: false
+                avatar: 67101248014d3b5f26a712f1
+                boss: 6710124c014d3baf26a882f2
+                departments: 
+                  - 67101248014d3b5f26a712f1
+                  - 671012c4514dab5126adb2f2
+      responses:
+        201: 
+          content: 
+            application/json: 
+              schema: 
+                type: object
+                properties:
+                  message: 
+                    type: string
+                    example: 'Usuario registrado exitosamente'
+                  user: 
+                    $ref: '#/components/schemas/User'
+
+  /user/create-in-bulk:
+    post: 
+      summary: Create Users in bulk in the DB
+      tags: 
+        - User
+      requestBody:
+        required: true
+        content:
+          application/json: 
+            schema:
+              type: array
+              items:
+                schema:
+                  type: object
+                  properties:
+                    firstName: 
+                      type: string
+                    lastName: 
+                      type: string
+                    email: 
+                      type: string
+                    password: 
+                      type: string
+                    role: 
+                      type: string
+                    specialPermissions:
+                      type: array
+                      items: 
+                        type: string
+                    reporter: 
+                      type: boolean
+                    avatar: 
+                      type: string
+                    boss:
+                      type: string
+                    departments:
+                      type: array
+                      items: 
+                        type: string
+              example:
+                -
+                  firstName: Joe
+                  lastName: Doe
+                  email: joedoe@example.com
+                  password: 123abc
+                  role: 'USER'
+                  specialPermissions:
+                    - 'userRegistration'
+                  reporter: false
+                  avatar: 67101248014d3b5f26a712f1
+                  boss: 6710124c014d3baf26a882f2
+                  departments: 
+                    - 67101248014d3b5f26a712f1
+                    - 671012c4514dab5126adb2f2
+      responses:
+        201: 
+          content: 
+            application/json: 
+              schema: 
+                type: object
+                properties:
+                  message: 
+                    type: string
+                    example: 'Usuarios registrados'
+                  user: 
+                    $ref: '#/components/schemas/User'
+  
+  /user/send/verification-code/{email}:
+    post:
+      summary: Send verification code by Email
+      tags:
+        - User
+      parameters: 
+        - name: email
+          in: path
+          required: true
+          description: User's Email
+          schema: 
+            type: string
+      responses:
+        200:
+          content: 
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  message: 
+                    type: string
+                    example: 'Codigo de verificacion solicitado'
+                  response:
+                    $ref: '#/components/schemas/EmailResponse'
+
+  /user/validate/verification-code/{id}:
+    post:
+      summary: Validate User verification code
+      tags:
+        - User
+      parameters: 
+        - name: id
+          in: path
+          required: true
+          description: User record id in the DB
+          schema: 
+            type: string
+      requestBody:
+        required: true
+        content: 
+          application/json:
+            schema:
+              type: object
+              properties:
+                verificationCode:
+                  type: string
+                  example: 'ABC123'
+      responses:
+        200:
+          content: 
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  message: 
+                    type: string
+                    example: 'Codigo de verificacion validado exitosamente'
+                  status:
+                    type: boolean
+                    example: true
+
+  /user/update/{id}:
+    put: 
+      summary: Update User by Id
+      tags:
+        - User
+      parameters: 
+        - name: id
+          in: path
+          required: true
+          description: User record id in the DB
+          schema: 
+            type: string
+      requestBody:
+        required: true
+        content: 
+          application/json:
+            schema: 
+              type: object
+              properties:
+                firstName: 
+                  type: string
+                lastName: 
+                  type: string
+                email: 
+                  type: string
+                password: 
+                  type: string
+                role: 
+                  type: string
+                specialPermissions:
+                  type: array
+                  items: 
+                    type: string
+                reporter: 
+                  type: boolean
+                avatar: 
+                  type: string
+                boss:
+                  type: string
+                departments:
+                  type: array
+                  items:
+                    type: string
+              example:
+                firstName: Joe
+                lastName: Doe
+                email: joedoe@example.com
+                password: 123abc
+                role: 'USER'
+                specialPermissions:
+                  - 'userRegistration'
+                reporter: false
+                avatar: 67101248014d3b5f26a712f1
+                boss: 6710124c014d3baf26a882f2
+                departments: 
+                  - 67101248014d3b5f26a712f1
+                  - 671012c4514dab5126adb2f2
+      responses: 
+        200: 
+          content: 
+            application/json: 
+              schema: 
+                type: object
+                properties:
+                  message: 
+                    type: string
+                    example: 'Usuario Actualizado exitosamente'
+                  user:
+                    $ref: '#/components/schemas/User'
+
+  /user/enable/{id}:
+    patch:
+      summary: Enable User by Id
+      tags:
+        - User
+      parameters: 
+        - name: id
+          in: path
+          required: true
+          description: User record id in the DB
+          schema: 
+            type: string
+      responses:
+        200:
+          content: 
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  message: 
+                    type: string
+                    example: 'Usuario habilitado exitosamente'
+                  user:
+                    $ref: '#/components/schemas/User'
+
+  /user/disable/{id}:
+    patch:
+      summary: Disable User by Id
+      tags:
+        - User
+      parameters: 
+        - name: id
+          in: path
+          required: true
+          description: User record id in the DB
+          schema: 
+            type: string
+      responses:
+        200:
+          content: 
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  message: 
+                    type: string
+                    example: 'Usuario deshabilitado exitosamente'
+                  user:
+                    $ref: '#/components/schemas/User'
+
+  /user/validate/user/{email}:
+    patch:
+      summary: Validate User by Email and Verification Code
+      tags:
+        - User
+      parameters: 
+        - name: email
+          in: path
+          required: true
+          description: User's Email
+          schema: 
+            type: string
+      requestBody:
+        required: true
+        content: 
+          application/json:
+            schema:
+              type: object
+              properties:
+                verificationCode:
+                  type: string
+                  example: 'ABC123'
+      responses:
+        200:
+          content: 
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  message: 
+                    type: string
+                    example: 'Usuario validado exitosamente'
+                  user:
+                    $ref: '#/components/schemas/User'
+
+  /user/recover/password/{email}:
+    patch:
+      summary: Recover User Password by Email and Verification Code
+      tags:
+        - User
+      parameters: 
+        - name: email
+          in: path
+          required: true
+          description: User's Email
+          schema: 
+            type: string
+      requestBody:
+        required: true
+        content: 
+          application/json:
+            schema:
+              type: object
+              properties:
+                verificationCode:
+                  type: string
+                  example: 'ABC123'
+                password: 
+                  type: string
+                  example: '12345678'
+      responses:
+        200:
+          content: 
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  message: 
+                    type: string
+                    example: 'Usuario validado exitosamente'
+                  user:
+                    $ref: '#/components/schemas/User'
+
+  /user/average/recalculate/{id}: 
+    patch: 
+      summary: Recaculate ticket rating average by User ID
+      tags: 
+        - User
+      parameters: 
+        - name: id
+          in: path
+          required: true
+          description: User record id in the DB
+          schema: 
+            type: string
+      responses: 
+        200: 
+          content: 
+            application/json: 
+              schema: 
+                type: object
+                properties:
+                  message: 
+                    type: string
+                    example: 'Usuario actualizado exitosamente'
+                  user:
+                    $ref: '#/components/schemas/User'
+  
+
+  /application/get/one:
+    get: 
+      summary: Get an Application by Query Parameters
+      tags: 
+        - Application
+      parameters:
+        - name: name
+          in: query
+          required: false
+          description: Name Application
+          schema: 
+            type: string
+        - name: enabled
+          in: query
+          required: false
+          description: Retrieve only enabled or disabled
+          schema: 
+            type: boolean
+        - name: owner
+          in: query
+          required: false
+          description: Owner Application
+          schema: 
+            type: string
+      responses: 
+        200: 
+          content: 
+            application/json: 
+              schema: 
+                type: object
+                properties:
+                  message: 
+                    type: string
+                    example: 'Aplicacion recuperada exitosamente'
+                  application:
+                    $ref: '#/components/schemas/Application'
+
+  /application/get/id/{id}:
+    get: 
+      summary: Get an Application by Id
+      tags: 
+        - Application
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Application record id in the DB
+          schema: 
+            type: string
+      responses: 
+        200: 
+          content: 
+            application/json: 
+              schema: 
+                type: object
+                properties:
+                  message: 
+                    type: string
+                    example: 'Aplicacion recuperada exitosamente'
+                  application:
+                    $ref: '#/components/schemas/Application'
+      
+  /application/create: 
+    post: 
+      summary: Create a new Application 
+      tags: 
+        - Application
+      requestBody:
+        required: true
+        content: 
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                owner: 
+                  type: string
+              example:
+                name: 'Metabase'
+                owner: '671012480a4d3b5a26c712f3'
+      responses: 
+        201: 
+          content: 
+            application/json: 
+              schema: 
+                type: object
+                properties:
+                  message: 
+                    type: string
+                    example: 'Aplicacion registrada exitosamente'
+                  application:
+                    $ref: '#/components/schemas/Application'
+
+  /application/enable-disable/{id}:
+    patch: 
+      summary: Enable or Disable an Application (Switch State)
+      tags: 
+        - Application
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Application record id in the DB
+          schema: 
+            type: string
+      responses: 
+        200: 
+          content: 
+            application/json: 
+              schema: 
+                type: object
+                properties:
+                  message: 
+                    type: string
+                    example: 'Aplicacion habilitada | deshabilitada exitosamente'
+                  application:
+                    $ref: '#/components/schemas/Application'
+
+  /application/delete/{id}:
+    delete: 
+      summary: Delete an Application (Switch State)
+      tags: 
+        - Application
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Application record id in the DB
+          schema: 
+            type: string
+      responses: 
+        200: 
+          content: 
+            application/json: 
+              schema: 
+                type: object
+                properties:
+                  message: 
+                    type: string
+                    example: 'Aplicacion eliminada exitosamente'
+                  application:
+                    $ref: '#/components/schemas/Application'
+                  
+
+  /organization/get/all:
+    get: 
+      summary: Get All or some Organizations by Query parameters
+      tags:
+        - Organization
+      parameters:
+        - name: name
+          in: query
+          required: false
+          description: Organization Name or (search by match)
+          schema:
+            type: string
+        - name: enabled
+          in: query
+          required: false
+          description: Retrieve only enabled or disabled
+          schema:
+            type: boolean
+        - name: director
+          in: query
+          description: Director User ID (ObjectId of DB)
+          schema: 
+            type: string
+      responses: 
+        200:
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  message: 
+                    type: string
+                    example: 'Organizaciones recuperadas exitosamente'
+                  organizations:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Organization'
+  
+  /organization/get/id/{id}:
+    get: 
+      summary: Get Organization by Id
+      tags:
+        - Organization
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Organization Id
+          schema:
+            type: string
+      responses: 
+        200:
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  message: 
+                    type: string
+                    example: 'Organizacion recuperada exitosamente'
+                  organization:
+                    $ref: '#/components/schemas/Organization'
+
+  /organization/create:
+    post: 
+      summary: Create a new Organization
+      tags:
+        - Organization
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: 
+                  type: string
+                director: 
+                  type: string
+              example: 
+                name: 'Empresa S.A. de C.V'
+                director: '671012480a4d3b5a26c712f3'
+      responses: 
+        201:
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  message: 
+                    type: string
+                    example: 'Organizacion registrada exitosamente'
+                  organization:
+                    $ref: '#/components/schemas/Organization'
+  
+  /organization/update/{id}:
+    put: 
+      summary: Update Organization by Id
+      tags:
+        - Organization
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Organization Id
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: 
+                  type: string
+                director: 
+                  type: string
+              example: 
+                name: 'Empresa S.A. de C.V'
+                director: '671012480a4d3b5a26c712f3'
+      responses: 
+        200:
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  message: 
+                    type: string
+                    example: 'Organizacion actualizada exitosamente'
+                  organization:
+                    $ref: '#/components/schemas/Organization'
+
+  /organization/enable/{id}:
+    patch: 
+      summary: Enable Organization by Id
+      tags:
+        - Organization
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Organization Id
+          schema:
+            type: string
+      responses: 
+        200:
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  message: 
+                    type: string
+                    example: 'Organizacion habilitada exitosamente'
+                  organization:
+                    $ref: '#/components/schemas/Organization'
+  
+  /organization/disable/{id}:
+    patch: 
+      summary: Disable Organization by Id
+      tags:
+        - Organization
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Organization Id
+          schema:
+            type: string
+      responses: 
+        200:
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  message: 
+                    type: string
+                    example: 'Organizacion deshabilitada exitosamente'
+                  organization:
+                    $ref: '#/components/schemas/Organization'
+
+
+  /department/get/all:
+    get: 
+      summary: Get All or some Departments by Query parameters
+      tags:
+        - Department
+      parameters:
+        - name: name
+          in: query
+          required: false
+          description: Department Name or (search by match)
+          schema:
+            type: string
+        - name: enabled
+          in: query
+          required: false
+          description: Retrieve only enabled or disabled
+          schema:
+            type: boolean
+        - name: organization
+          in: query
+          description: Organization ID (ObjectId of DB)
+          schema: 
+            type: string
+        - name: owner
+          in: query
+          description: Owner User ID (ObjectId of DB)
+          schema: 
+            type: string
+        - name: populateOrganization
+          in: query
+          description: Populate Organization field
+          schema: 
+            type: boolean
+      responses: 
+        200:
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  message: 
+                    type: string
+                    example: 'Departamentos recuperados exitosamente'
+                  departments:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Department'
+  
+  /department/get/id/{id}:
+    get: 
+      summary: Get Department by Id
+      tags:
+        - Department
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Department Id
+          schema:
+            type: string
+      responses: 
+        200:
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  message: 
+                    type: string
+                    example: 'Departamento recuperado exitosamente'
+                  department:
+                    $ref: '#/components/schemas/Department'
+
+  /department/create:
+    post: 
+      summary: Create a new Department
+      tags:
+        - Department
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: 
+                  type: string
+                organization: 
+                  type: string
+                owner: 
+                  type: string
+              example: 
+                name: 'IT'
+                organization: '6710124a014f3bcc26a122f8'
+                owner: '671012480a4d3b5a26c712f3'
+      responses: 
+        201:
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  message: 
+                    type: string
+                    example: 'Departamento registrado exitosamente'
+                  department:
+                    $ref: '#/components/schemas/Department'
+  
+  /department/update/{id}:
+    put: 
+      summary: Update Department by Id
+      tags:
+        - Department
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Department Id
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: 
+                  type: string
+                organization: 
+                  type: string
+                owner: 
+                  type: string
+              example: 
+                name: 'IT'
+                organization: '6710124a014f3bcc26a122f8'
+                owner: '671012480a4d3b5a26c712f3'
+      responses: 
+        200:
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  message: 
+                    type: string
+                    example: 'Departamento actualizado exitosamente'
+                  department:
+                    $ref: '#/components/schemas/Department'
+
+  /department/enable/{id}:
+    patch: 
+      summary: Enable Department by Id
+      tags:
+        - Department
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Department Id
+          schema:
+            type: string
+      responses: 
+        200:
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  message: 
+                    type: string
+                    example: 'Departamento habilitado exitosamente'
+                  department:
+                    $ref: '#/components/schemas/Department'
+  
+  /department/disable/{id}:
+    patch: 
+      summary: Disable Department by Id
+      tags:
+        - Department
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Department Id
+          schema:
+            type: string
+      responses: 
+        200:
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  message: 
+                    type: string
+                    example: 'Departamento deshabilitado exitosamente'
+                  department:
+                    $ref: '#/components/schemas/Department'
+
+
+  /file/get/all:
+    get: 
+      summary: Get All or some Files by Query parameters
+      tags:
+        - File
+      parameters:
+        - name: owner
+          in: query
+          description: Owner User ID (ObjectId of DB)
+          schema: 
+            type: string
+        - name: enabled
+          in: query
+          required: false
+          description: Retrieve only enabled or disabled
+          schema:
+            type: boolean
+      responses: 
+        200:
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  message: 
+                    type: string
+                    example: 'Archivos recuperados exitosamente'
+                  files:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/File'
+
+  /file/get/id/{id}:
+    get: 
+      summary: Retrieve file record by Id
+      tags:
+        - File
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: File record Id
+          schema:
+            type: string
+      responses:
+        200: 
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: 'Archivo recuperado exitosamente'
+                  file:
+                    $ref: '#/components/schemas/File'
+
+  /file/get/file/{id}:
+    get:
+      summary: Retrieve file by Id
+      tags:
+        - File
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: File record Id
+          schema:
+            type: string
+      responses:
+        200: 
+          content:
+            application/file:
+              schema:
+                type: string
+                format: binary
+
+  /file/get/public/file/{id}:
+    get:
+      summary: Retrieve public file by Id {URL}
+      tags:
+        - File
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: File record Id
+          schema:
+            type: string
+      responses:
+        200: 
+          content:
+            application/file:
+              schema:
+                type: string
+                format: binary
+  
+  /file/create/{owner}/{foldername}:
+    post: 
+      summary: Create a file record, upload, store and link a file to the newly created record
+      tags:
+        - File
+      parameters:
+        - name: owner
+          in: path
+          required: true
+          description: User Id of the File owner
+          schema:
+            type: string
+        - name: foldername
+          in: path
+          required: true
+          description: Destination folder name
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+              required: 
+                - file
+      responses:
+        201: 
+          content:
+            application/json: 
+              schema:
+                type: object
+                properties:
+                  message: 
+                    type: string
+                    example: 'Archivo relacionado exitosamente'
+                  file: 
+                    $ref: '#/components/schemas/File'
+  
+  /file/update/{id}/{foldername}:
+    put:
+      summary: Update File record by Id
+      tags:
+        - File
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: File record Id
+          schema:
+            type: string
+        - name: foldername
+          in: path
+          required: true
+          description: Destination folder name
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+              required: 
+                - file
+      responses:
+        200: 
+          content:
+            application/json: 
+              schema:
+                type: object
+                properties:
+                  message: 
+                    type: string
+                    example: 'Archivo actualizado exitosamente'
+                  file: 
+                    $ref: '#/components/schemas/File'
+
+  /file/enable/{id}:
+    patch: 
+      summary: Enable File by Id
+      tags:
+        - File
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: File Id
+          schema:
+            type: string
+      responses: 
+        200:
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  message: 
+                    type: string
+                    example: 'Archivo recuperado exitosamente'
+                  file:
+                    $ref: '#/components/schemas/File'
+  
+  /file/disable/{id}:
+    patch: 
+      summary: Disable File by Id
+      tags:
+        - File
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: File Id
+          schema:
+            type: string
+      responses: 
+        200:
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  message: 
+                    type: string
+                    example: 'Archivo eliminado exitosamente'
+                  file:
+                    $ref: '#/components/schemas/File'
+
+  /file/delete/{id}:
+    delete: 
+      summary: Delete File record by Id
+      tags:
+        - File
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: File record Id
+          schema:
+            type: string
+      responses:
+        200: 
+          content:
+            application/json: 
+              schema:
+                type: object
+                properties:
+                  message: 
+                    type: string
+                    example: 'Archivo eliminado exitosamente'
+                  file: 
+                    $ref: '#/components/schemas/File'
+
+
+  /ticket/get/all:
+    get: 
+      summary: Get All or some Tickets by Query parameters
+      tags:
+        - Ticket
+      parameters:
+        - name: title
+          in: query
+          required: false
+          description: Ticket Title or (search by match)
+          schema:
+            type: string
+        - name: description
+          in: query
+          required: false
+          description: Ticket Description or (search by match)
+          schema:
+            type: string
+        - name: includesStatus
+          in: query
+          required: false
+          description: Whether to include or exclude status in the search
+          schema: 
+            type: boolean
+        - name: status
+          in: query
+          required: false
+          description: Status to which the ticket belongs
+          schema: 
+            type: string
+        - name: includesRatings
+          in: query
+          required: false
+          description: Whether to include or exclude ratings in the search
+          schema: 
+            type: boolean
+        - name: rating
+          in: query
+          required: false
+          description: Ratings to which the ticket belongs
+          schema: 
+            type: number
+        - name: owner
+          in: query
+          description: Owner User ID (ObjectId of DB)
+          schema: 
+            type: string
+        - name: assignedTo
+          in: query
+          description: Owner User ID (ObjectId of DB)
+          schema: 
+            type: string
+        - name: includesDepartments
+          in: query
+          required: false
+          description: Whether to include or exclude departments in the search
+          schema: 
+            type: boolean
+        - name: department
+          in: query
+          required: false
+          description: Department to which the ticket belongs (Mongo _ids)
+          schema: 
+            type: string
+        - name: includesHelpTopics
+          in: query
+          required: false
+          description: Whether to include or exclude help topics in the search
+          schema: 
+            type: boolean
+        - name: helpTopic
+          in: query
+          required: false
+          description: Help Topics to which the ticket belongs (Mongo _ids)
+          schema: 
+            type: string
+      responses: 
+        200:
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  message: 
+                    type: string
+                    example: 'Tickets recuperados exitosamente'
+                  tickets:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Ticket'
+  
+  /ticket/get/id/{id}:
+    get: 
+      summary: Get Ticket by Id
+      tags:
+        - Ticket
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Ticket Id
+          schema:
+            type: string
+      responses: 
+        200:
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  message: 
+                    type: string
+                    example: 'Ticket recuperado exitosamente'
+                  ticket:
+                    $ref: '#/components/schemas/Ticket'
+
+  /ticket/create:
+    post: 
+      summary: Create a new Ticket
+      tags:
+        - Ticket
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                description:
+                  type: string
+                owner:
+                  type: string
+                department:
+                  type: string
+                helpTopic: 
+                  type: string
+              example: 
+                title: 'Problemas con internet'
+                description: 'Al encender mi laptop no se conecta al internet por wifi'
+                owner: '671012480a4d3b5a26c712f3'
+                department: '6710124ac1412baf26a8c2d3'
+                helpTopic: '67201d7415d0a63ab50aac05'
+      responses: 
+        201:
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  message: 
+                    type: string
+                    example: 'Ticket registrado exitosamente'
+                  ticket:
+                    $ref: '#/components/schemas/Ticket'
+
+  /ticket/create-in-bulk:
+    post: 
+      summary: Create new Tickets In Bulk
+      tags:
+        - Ticket
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                properties:
+                  title:
+                    type: string
+                  description:
+                    type: string
+                  owner:
+                    type: string
+              example: 
+                  - title: 'Problemas con internet'
+                    description: 'Al encender mi laptop no se conecta al internet por wifi'
+                    owner: '671012480a4d3b5a26c712f3'
+      responses: 
+        201:
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  message: 
+                    type: string
+                    example: 'Ticket registrado exitosamente'
+                  ticket:
+                    $ref: '#/components/schemas/Ticket'
+  
+  
+  /ticket/update/{id}:
+    put: 
+      summary: Update Ticket by Id
+      tags:
+        - Ticket
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Ticket Id
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                description:
+                  type: string
+                status: 
+                  type: string
+                justification: 
+                  type: string
+              example: 
+                title: 'Problemas con internet'
+                description: 'Al encender mi laptop no se conecta al internet por wifi'
+                status: 'ASSIGNED'
+                justification: 'Ticket Asignado a otro agente por saturacion'
+      responses: 
+        200:
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  message: 
+                    type: string
+                    example: 'Ticket actualizado exitosamente'
+                  ticket:
+                    $ref: '#/components/schemas/Ticket'
+
+  /ticket/add/item/{id}:
+    patch: 
+      summary: Add Item to a Ticket by Id
+      tags:
+        - Ticket
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Ticket Id
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message: 
+                  type: string
+                file: 
+                  type: string
+                department: 
+                  type: string
+                transfer: 
+                  type: string
+                assignedTo: 
+                  type: string
+                helpTopic: 
+                  type: string
+              example: 
+                message: 67201d8fad157e76705f684c
+                file: 67201db1fc52ad8c90c07356
+                department: 6710124ac1412baf26a8c2d3
+                transfer: 67201dcd027a4e57366cfcea
+                assignedTo: 6710124c014d3baf26a882f2
+                helpTopic: 67201d7415d0a63ab50aac05
+      responses: 
+        200:
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  message: 
+                    type: string
+                    example: 'Item vinculado exitosamente'
+                  ticket:
+                    $ref: '#/components/schemas/Ticket'
+  
+  /ticket/remove/item/{id}:
+    patch: 
+      summary: Remove Item from a Ticket by Id
+      tags:
+        - Ticket
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Ticket Id
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                message: 
+                  type: string
+                file: 
+                  type: string
+                transfer: 
+                  type: string
+              example: 
+                message: 67201d8fad157e76705f684c
+                file: 67201db1fc52ad8c90c07356
+                transfer: 67201dcd027a4e57366cfcea
+      responses: 
+        200:
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  message: 
+                    type: string
+                    example: 'Item desvinculado exitosamente'
+                  ticket:
+                    $ref: '#/components/schemas/Ticket'
+
+  /ticket/rate/{id}:
+    patch: 
+      summary: Rate Ticket by Id
+      tags:
+        - Ticket
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Ticket Id
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                rating: 
+                  type: number
+                comment: 
+                  type: string
+              example: 
+                rating: 4
+                comment: 'Excelente resolucion, pero demoro al responder'
+      responses: 
+        200:
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  message: 
+                    type: string
+                    example: 'Ticket calificado exitosamente'
+                  ticket:
+                    $ref: '#/components/schemas/Ticket'
+
+  /ticket/delete/{id}:
+    delete: 
+      summary: Delete Ticket and its files and messages by Id
+      tags:
+        - Ticket
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Ticket Id
+          schema:
+            type: string
+      responses: 
+        200:
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  message: 
+                    type: string
+                    example: 'Item eliminado exitosamente'
+                  ticket:
+                    $ref: '#/components/schemas/Ticket'
+
+
+  /help-topic/get/all:
+    get: 
+      summary: Get All or some Help Topics by Query parameters
+      tags:
+        - HelpTopic
+      parameters:
+        - name: name
+          in: query
+          required: false
+          description: Help Topic Name or (search by match)
+          schema:
+            type: string
+        - name: expIn
+          in: query
+          required: false
+          description: Minutes until ticket expires
+          schema:
+            type: number
+        - name: includesTags
+          in: query
+          required: false
+          description: Whether to include or exclude tags in the search
+          schema: 
+            type: boolean
+        - name: tags
+          in: query
+          required: false
+          description: Tags to which the help topic belongs (Mongo _ids)
+          schema: 
+            type: string
+        - name: enabled
+          in: query
+          required: false
+          description: Retrieve only enabled or disabled
+          schema:
+            type: boolean
+        - name: includesDepartments
+          in: query
+          required: false
+          description: Whether to include or exclude departments in the search
+          schema: 
+            type: boolean
+        - name: department
+          in: query
+          required: false
+          description: Departments to which the help topic belongs (Mongo _ids)
+          schema: 
+            type: string
+      responses: 
+        200:
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  message: 
+                    type: string
+                    example: 'Temas de ayuda recuperados exitosamente'
+                  helpTopics:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/HelpTopic'
+  
+  /help-topic/get/id/{id}:
+    get: 
+      summary: Get Help Topic by Id
+      tags:
+        - HelpTopic
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Help Topic Id
+          schema:
+            type: string
+      responses: 
+        200:
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  message: 
+                    type: string
+                    example: 'Tema de ayuda recuperado exitosamente'
+                  helpTopic:
+                    $ref: '#/components/schemas/HelpTopic'
+
+  /help-topic/create:
+    post: 
+      summary: Create a new Help Topic
+      tags:
+        - HelpTopic
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: 
+                  type: string
+                expIn: 
+                  type: number
+                tags: 
+                  type: array
+                  items:
+                    type: string
+                department: 
+                  type: string
+              example: 
+                name: 'Instalacion de Aplicacion'
+                expIn: 120
+                tags: 
+                  - 'Software'
+                  - 'Aplicaciones'
+                  - 'Programas'
+                department: '6710124a014f3bcc26a122f8'
+      responses: 
+        201:
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  message: 
+                    type: string
+                    example: 'Tema de ayuda registrado exitosamente'
+                  helpTopic:
+                    $ref: '#/components/schemas/HelpTopic'
+  
+  /help-topic/update/{id}:
+    put: 
+      summary: Update Help Topic by Id
+      tags:
+        - HelpTopic
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Help Topic Id
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: 
+                  type: string
+                expIn: 
+                  type: number
+                tags: 
+                  type: array
+                  items:
+                    type: string
+                department: 
+                  type: string
+              example: 
+                name: 'Instalacion de Aplicacion'
+                expIn: 120
+                tags: 
+                  - 'Software'
+                  - 'Aplicaciones'
+                  - 'Programas'
+                department: '6710124a014f3bcc26a122f8'
+      responses: 
+        200:
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  message: 
+                    type: string
+                    example: 'Tema de ayuda actualizado exitosamente'
+                  helpTopic:
+                    $ref: '#/components/schemas/HelpTopic'
+
+  /help-topic/enable/{id}:
+    patch: 
+      summary: Enable Help Topic by Id
+      tags:
+        - HelpTopic
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Help Topic Id
+          schema:
+            type: string
+      responses: 
+        200:
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  message: 
+                    type: string
+                    example: 'Tema de ayuda habilitado exitosamente'
+                  helpTopic:
+                    $ref: '#/components/schemas/HelpTopic'
+  
+  /help-topic/disable/{id}:
+    patch: 
+      summary: Disable HelpTopic by Id
+      tags:
+        - HelpTopic
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: HelpTopic Id
+          schema:
+            type: string
+      responses: 
+        200:
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  message: 
+                    type: string
+                    example: 'Tema de ayuda deshabilitado exitosamente'
+                  helpTopic:
+                    $ref: '#/components/schemas/HelpTopic'
+
+
+  /message/get/all:
+    get: 
+      summary: Get All or some Messages by Query parameters
+      tags:
+        - Message
+      parameters:
+        - name: text
+          in: query
+          required: false
+          description: Message Text or (search by match)
+          schema:
+            type: string
+        - name: owner
+          in: query
+          required: false
+          description: Owner User ID (ObjectId of DB)
+          schema: 
+            type: string
+      responses: 
+        200:
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  message: 
+                    type: string
+                    example: 'Mensajes recuperados exitosamente'
+                  messages:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Message'
+  
+  /message/get/id/{id}:
+    get: 
+      summary: Get Message by Id
+      tags:
+        - Message
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Message Id
+          schema:
+            type: string
+      responses: 
+        200:
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  resMessage: 
+                    type: string
+                    example: 'Mensaje recuperado exitosamente'
+                  message:
+                    $ref: '#/components/schemas/Message'
+
+  /message/create:
+    post: 
+      summary: Create a new Message
+      tags:
+        - Message
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                text: 
+                  type: string
+                visibility:
+                  type: string
+                attachment:
+                  type: string
+                attachmentType:
+                  type: string 
+                owner:
+                  type: string         
+              example: 
+                text: 'Hola, Respondo en un momento'
+                visibility: 'TO_ALL'
+                owner: 671012480a4d3b5a26c712f3
+                attachment: 67201db1fc52ad8c90c07356
+                attachmentType: 'IMAGE'
+      responses: 
+        201:
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  resMessage: 
+                    type: string
+                    example: 'Mensaje registrado exitosamente'
+                  message:
+                    $ref: '#/components/schemas/Message'
+  
+  /message/update/{id}:
+    put: 
+      summary: Update Message by Id
+      tags:
+        - Message
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Message Id
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                text: 
+                  type: string
+                visibility:
+                  type: string
+                attachment:
+                  type: string
+                attachmentType:
+                  type: string      
+              example: 
+                text: 'Hola, Respondo en un momento'
+                visibility: 'TO_ALL'
+                attachment: 67201db1fc52ad8c90c07356
+                attachmentType: 'IMAGE'
+      responses: 
+        200:
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  resMessage: 
+                    type: string
+                    example: 'Mensaje actualizado exitosamente'
+                  message:
+                    $ref: '#/components/schemas/Message'
+
+  /message/delete/{id}:
+    delete: 
+      summary: Delete Message by Id
+      tags:
+        - Message
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Message Id
+          schema:
+            type: string
+      responses: 
+        200:
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  resMessage: 
+                    type: string
+                    example: 'Mensaje eliminado exitosamente'
+                  message:
+                    $ref: '#/components/schemas/Message'
+
+
+  /transfer/get/all:
+    get: 
+      summary: Get All or some Transfers by Query parameters
+      tags:
+        - Transfer
+      parameters:
+        - name: ticket
+          in: query
+          required: false
+          description: Ticket ID (ObjectId of DB)
+          schema: 
+            type: string
+      responses: 
+        200:
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  message: 
+                    type: string
+                    example: 'Transferencias recuperadas exitosamente'
+                  transfers:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Transfer'
+  
+  /transfer/get/id/{id}:
+    get: 
+      summary: Get Transfer by Id
+      tags:
+        - Transfer
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Transfer Id
+          schema:
+            type: string
+      responses: 
+        200:
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  message: 
+                    type: string
+                    example: 'Transferencia recuperada exitosamente'
+                  transfer:
+                    $ref: '#/components/schemas/Transfer'
+
+  /transfer/create:
+    post: 
+      summary: Create a new Transfer
+      tags:
+        - Transfer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nextDepartment:
+                  type: string
+                nextAssigned:
+                  type: string
+                nextHelpTopic:
+                  type: string
+                preDepartment:
+                  type: string
+                preAssigned:
+                  type: string
+                preHelpTopic:
+                  type: string
+                ticket:
+                  type: string
+                cretedAt: 
+                  type: Date
+                updatedAt: 
+                  type: Date
+              example: 
+                nextDepartment: 6710124a014f3bcc26a122f8
+                nextAssigned: 672552ede0dd3ce2fe1f6930
+                nextHelpTopic: 672552f4c1ad14363388c81c
+                preDepartment: 6710124a818f32ca26a123c7
+                preAssigned: 672552f8cf9c97b5c74d223b
+                preHelpTopic: 672552fc5d48c2c55d595ff3
+                ticket: 672553012cdcfa7091732736
+      responses: 
+        201:
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  message: 
+                    type: string
+                    example: 'Transferencia registrada exitosamente'
+                  transfer:
+                    $ref: '#/components/schemas/Transfer'
+  
+  /transfer/update/{id}:
+    put: 
+      summary: Update Transfer by Id
+      tags:
+        - Transfer
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Transfer Id
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nextDepartment:
+                  type: string
+                nextAssigned:
+                  type: string
+                nextHelpTopic:
+                  type: string
+                preDepartment:
+                  type: string
+                preAssigned:
+                  type: string
+                preHelpTopic:
+                  type: string
+                ticket:
+                  type: string
+                cretedAt: 
+                  type: Date
+                updatedAt: 
+                  type: Date
+              example: 
+                nextDepartment: 6710124a014f3bcc26a122f8
+                nextAssigned: 672552ede0dd3ce2fe1f6930
+                nextHelpTopic: 672552f4c1ad14363388c81c
+                preDepartment: 6710124a818f32ca26a123c7
+                preAssigned: 672552f8cf9c97b5c74d223b
+                preHelpTopic: 672552fc5d48c2c55d595ff3
+                ticket: 672553012cdcfa7091732736
+      responses: 
+        200:
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  message: 
+                    type: string
+                    example: 'Transferencia actualizada exitosamente'
+                  transfer:
+                    $ref: '#/components/schemas/Transfer'
+
+  /transfer/delete/{id}:
+    delete: 
+      summary: Delete Transfer by Id
+      tags:
+        - Transfer
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Transfer Id
+          schema:
+            type: string
+      responses: 
+        200:
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  message: 
+                    type: string
+                    example: 'Transferencia eliminada exitosamente'
+                  transfer:
+                    $ref: '#/components/schemas/Transfer'
+  
+
+  /incidence/get/all: 
+    get: 
+      summary: Get all or some Incidents by query parameters
+      tags: 
+        - Incidence
+      parameters:
+        - name: title
+          in: query
+          required: false
+          description: Incident Title 
+          schema:
+            type: string
+        - name: description
+          in: query
+          required: false
+          description: Incident Description 
+          schema:
+            type: string
+        - name: includesSeverity
+          in: query
+          required: false
+          description: Whether to include or exclude severities in the search
+          schema:
+            type: boolean
+        - name: severity
+          in: query
+          required: false
+          description: Incident Severity or Severities
+          schema:
+            type: string
+        - name: author
+          in: query
+          required: false
+          description: Incident Author
+          schema:
+            type: string
+        - name: includesAgent
+          in: query
+          required: false
+          description: Whether to include or exclude agents in the search
+          schema: 
+            type: boolean
+        - name: agent
+          in: query
+          required: false
+          description: Incident Agent
+          schema:
+            type: string
+        - name: startDate
+          in: query
+          required: false
+          description: Initial date for the search
+          schema:
+            type: Date
+        - name: endDate
+          in: query
+          required: false
+          description: Final date for the search
+          schema:
+            type: Date
+      responses: 
+        200:
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  message: 
+                    type: string
+                    example: 'Incidencias recuperadas exitosamente'
+                  incidents:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Incidence'
+                    example:
+                      - _id: 6725530984e008b4efe181f4
+                        title: Retardo de 18 minutos
+                        description: Checo entrada 3 minutos después de la máxima tolerancia de 15 min, 08:18 am
+                        severity: 5
+                        author: 
+                          _id: 672552ede0dd3ce2fe1f6930
+                          firstName: Ramon
+                          lastName: Corona
+                          email: ramoncorona@example.com
+                        agent: 
+                          _id: 672552f8cf9c97b5c74d223b
+                          firstName: Jose Luis 
+                          lastName: Rodriguez
+                          email: joseluisrodriguez@example.com
+                        createdAt: 2024-10-16T20:30:00.501+00:00
+                        updatedAt: 2024-10-16T20:30:00.501+00:00
+
+  /incidence/get/boss/{id}: 
+    get: 
+      summary: Get all or some Incidents by query parameters
+      tags: 
+        - Incidence
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: User (Boss) Id
+          schema:
+            type: string
+      responses: 
+        200:
+          content:
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  message: 
+                    type: string
+                    example: 'Incidencias recuperadas exitosamente'
+                  incidents:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Incidence'
+                    example:
+                      - _id: 6725530984e008b4efe181f4
+                        title: Retardo de 18 minutos
+                        description: Checo entrada 3 minutos después de la máxima tolerancia de 15 min, 08:18 am
+                        severity: 5
+                        author: 
+                          _id: 672552ede0dd3ce2fe1f6930
+                          firstName: Ramon
+                          lastName: Corona
+                          email: ramoncorona@example.com
+                        agent: 
+                          _id: 672552f8cf9c97b5c74d223b
+                          firstName: Jose Luis 
+                          lastName: Rodriguez
+                          email: joseluisrodriguez@example.com
+                        createdAt: 2024-10-16T20:30:00.501+00:00
+                        updatedAt: 2024-10-16T20:30:00.501+00:00
+
+  /incidence/get/id/{id}:
+    get:
+      summary: Get Incidence by Id
+      tags:
+        - Incidence
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Incident Id (Mongo ObjectId)
+          schema:
+            type: string
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: 'Incidencia recuperada exitosamente'
+                  incidence: 
+                    example:
+                      _id: 6725530984e008b4efe181f4
+                      title: Retardo de 18 minutos
+                      description: Checo entrada 3 minutos después de la máxima tolerancia de 15 min, 08:18 am
+                      severity: 5
+                      author: 
+                        _id: 672552ede0dd3ce2fe1f6930
+                        firstName: Ramon
+                        lastName: Corona
+                        email: ramoncorona@example.com
+                      agent: 
+                        _id: 672552f8cf9c97b5c74d223b
+                        firstName: Jose Luis 
+                        lastName: Rodriguez
+                        email: joseluisrodriguez@example.com
+                      createdAt: 2024-10-16T20:30:00.501+00:00
+                      updatedAt: 2024-10-16T20:30:00.501+00:00
+
+  /incidence/create:
+    post:
+      summary: Create/Register a new Incidence
+      tags:
+        - Incidence
+      requestBody:
+        required: true
+        content: 
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                description:
+                  type: string
+                severity:
+                  type: number
+                author:
+                  type: string
+                agent: 
+                  type: string
+              example: 
+                title: Retardo de 18 minutos
+                description: Checo entrada 3 minutos después de la máxima tolerancia de 15 min, 08:18 am
+                severity: 5
+                author: 672552ede0dd3ce2fe1f6930
+                agent: 672552f8cf9c97b5c74d223b
+      responses:
+        201:
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: 'Incidencia registrada exitosamente'
+                  incidence: 
+                    $ref: '#/components/schemas/Incidence'
+
+  /incidence/update/{id}:
+    put:
+      summary: Update Incidence by Id
+      tags:
+        - Incidence
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Incident Id (Mongo ObjectId)
+          schema: 
+            type: string
+      requestBody:
+        required: true
+        content: 
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                description:
+                  type: string
+                severity:
+                  type: number
+              example: 
+                title: Retardo de 18 minutos
+                description: Checo entrada 3 minutos después de la máxima tolerancia de 15 min, 08:18 am
+                severity: 5
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: 'Incidencia actualizada exitosamente'
+                  incidence: 
+                    $ref: '#/components/schemas/Incidence'
+
+  /incidence/delete/{id}:
+    delete:
+      summary: Delete Incidence by Id
+      tags:
+        - Incidence
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Incident Id (Mongo ObjectId)
+          schema: 
+            type: string
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: 'Incidencia eliminada exitosamente'
+                  incidence: 
+                    $ref: '#/components/schemas/Incidence'
+
+
+  /evaluation/get/all:
+    get:  
+      summary: Get all or some evaluations by query parameters
+      tags: 
+        - Evaluation
+      parameters:
+        - name: includesRate
+          in: query
+          required: false
+          description: Whether to include or exclude ratings in the search
+          schema: 
+            type: boolean
+        - name: rate
+          in: query
+          required: false
+          description: Evaluation ratings for the search (separated by commas)
+          schema: 
+            type: string
+        - name: comments
+          in: query
+          required: false
+          description: keywords or match in comments
+          schema: 
+            type: string
+        - name: rated
+          in: query
+          required: false
+          description: Its Evaluated?
+          schema:
+            type: boolean
+        - name: includesAgent
+          in: query
+          required: false
+          description: Whether to include or exclude agents in the search
+          schema: 
+            type: boolean
+        - name: agent
+          in: query
+          required: false
+          description: User (Agent) Ids (separated by commas)
+          schema: 
+            type: string
+        - name: evaluator
+          in: query
+          required: false
+          description: User (Evaluator/Boss) Id
+          schema: 
+            type: string
+        - name: boss
+          in: query
+          required: false
+          description: User (Boss) Id
+          schema:
+            type: string
+      responses:
+        200: 
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: 'Evaluaciones recuperadas exitosamente'
+                  evaluations: 
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Evaluation'
+                    example:  
+                      - _id: 6725530984e008b4efe181f4
+                        rate: 60
+                        comments: Demasiados Retardos dentro del mes
+                        rated: true
+                        month: 12
+                        year: 2024
+                        agent: 
+                          _id: 672552f8cf9c97b5c74d223b
+                          firstName: Jose Luis 
+                          lastName: Rodriguez
+                          email: joseluisrodriguez@example.com
+                        evaluator: 
+                          _id: 672552ede0dd3ce2fe1f6930
+                          firstName: Ramon
+                          lastName: Corona
+                          email: ramoncorona@example.com
+                        createdAt: 2024-10-16T20:30:00.501+00:00
+                        updatedAt: 2024-10-16T20:30:00.501+00:00
+                    
+  /evaluation/get/boss/{id}:
+    get: 
+      summary: Get Evaluations by Boss Id
+      tags:
+        - Evaluation
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: User (Boss) Id
+          schema:
+            type: string
+      responses:
+        200: 
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: 'Evaluaciones recuperadas exitosamente'
+                  evaluations: 
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Evaluation'
+                    example:
+                      - _id: 6725530984e008b4efe181f4
+                        rate: 60
+                        comments: Demasiados Retardos dentro del mes
+                        rated: true
+                        month: 12
+                        year: 2024
+                        agent: 
+                          _id: 672552f8cf9c97b5c74d223b
+                          firstName: Jose Luis 
+                          lastName: Rodriguez
+                          email: joseluisrodriguez@example.com
+                        evaluator: 
+                          _id: 672552ede0dd3ce2fe1f6930
+                          firstName: Ramon
+                          lastName: Corona
+                          email: ramoncorona@example.com
+                        createdAt: 2024-10-16T20:30:00.501+00:00
+                        updatedAt: 2024-10-16T20:30:00.501+00:00
+
+  /evaluation/get/id/{id}: 
+    get: 
+      summary: Get Evaluation by Id
+      tags: 
+        - Evaluation
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Evaluation ID
+          schema: 
+            type: string
+      responses:
+        200: 
+          content: 
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  message: 
+                    type: string
+                    example: 'Evaluación recuperada exitosamente'
+                  evaluation:
+                    example:
+                      _id: 6725530984e008b4efe181f4
+                      rate: 60
+                      comments: Demasiados Retardos dentro del mes
+                      rated: true
+                      month: 12
+                      year: 2024
+                      agent: 
+                        _id: 672552f8cf9c97b5c74d223b
+                        firstName: Jose Luis 
+                        lastName: Rodriguez
+                        email: joseluisrodriguez@example.com
+                      evaluator: 
+                        _id: 672552ede0dd3ce2fe1f6930
+                        firstName: Ramon
+                        lastName: Corona
+                        email: ramoncorona@example.com
+                      createdAt: 2024-10-16T20:30:00.501+00:00
+                      updatedAt: 2024-10-16T20:30:00.501+00:00
+
+  /evaluation/create: 
+    post: 
+      summary: Create a new Evaluation
+      tags: 
+        - Evaluation
+      requestBody:
+        content:
+          application/json:
+            schema: 
+              type: object
+              properties:
+                rate: 
+                  type: number
+                comments: 
+                  type: string
+                rated: 
+                  type: boolean
+                agent: 
+                  type: string
+                evaluator: 
+                  type: string
+              example:
+                rate: 60
+                comments: Demasiados Retardos dentro del mes
+                rated: true
+                agent: 672552f8cf9c97b5c74d223b
+                evaluator: 672552ede0dd3ce2fe1f6930
+      responses:
+        201: 
+          content: 
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  message: 
+                    type: string
+                    example: 'Evaluación registrada exitosamente'
+                  evaluation:
+                    $ref: '#/components/schemas/Evaluation'
+
+  /evaluation/create/in-bulk: 
+    post: 
+      summary: Mass Creation of Monthly Evaluations
+      tags: 
+        - Evaluation
+      requestBody:
+        content:
+          application/json:
+            schema: 
+              type: object
+              properties:
+                month:
+                  type: number
+                year: 
+                  type: number
+              example:
+                month: 12
+                year: 2024
+      responses:
+        201: 
+          content: 
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  message: 
+                    type: string
+                    example: 'Evaluaciones registradas exitosamente'
+                  evaluation:
+                    $ref: '#/components/schemas/Evaluation'
+
+  /evaluation/update/{id}: 
+    put: 
+      summary: Update Evaluation by Id
+      tags: 
+        - Evaluation
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Evaluation ID
+          schema: 
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema: 
+              type: object
+              properties:
+                rate: 
+                  type: number
+                comments: 
+                  type: string
+                rated: 
+                  type: boolean
+                evaluator: 
+                  type: string
+              example:
+                rate: 60
+                comments: Demasiados Retardos dentro del mes
+                rated: true
+                evaluator: 672552ede0dd3ce2fe1f6930
+      responses:
+        200: 
+          content: 
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  message: 
+                    type: string
+                    example: 'Evaluación actualizada exitosamente'
+                  evaluation:
+                    $ref: '#/components/schemas/Evaluation'
+          
+  /evaluation/delete/{id}: 
+    delete: 
+      summary: Delete Evaluation by Id
+      tags: 
+        - Evaluation
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Evaluation ID
+          schema: 
+            type: string
+      responses:
+        200: 
+          content: 
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  message: 
+                    type: string
+                    example: 'Evaluación eliminada exitosamente'
+                  evaluation:
+                    $ref: '#/components/schemas/Evaluation'
+
+
+  /classifier/train:
+    patch:
+      summary: Train Ticket Classifier
+      tags:
+        - Classifier
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                properties:
+                  description:
+                    type: string
+                    example: "La laptop no enciende y no muestra luces ni sonido al presionar el botón de encendido."
+                  label:
+                    type: number
+                    example: 0
+              example:
+                - description: "La laptop no enciende y no muestra luces ni sonido al presionar el botón de encendido."
+                  label: 0
+                - description: "La impresora no responde al intentar imprimir."
+                  label: 1
+      responses:
+        200: 
+          content: 
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  message: 
+                    type: string
+                    example: 'Modelo reentrenado con éxito'
+                  examples:
+                    type: number
+                    example: 10
+
+
+  /classifier/train/automatic:
+    patch:
+      summary: Train Ticket Classifier with stored ticket training data and help topics
+      tags:
+        - Classifier
+      responses:
+        200: 
+          content: 
+            application/json:
+              schema: 
+                type: object
+                properties:
+                  message: 
+                    type: string
+                    example: 'Modelo reentrenado con éxito'
+                  examples:
+                    type: number
+                    example: 10

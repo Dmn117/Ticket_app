@@ -6,7 +6,7 @@ import validatorHandler from "../../../shared/middlewares/validator.handler";
 
 import { checkRoles } from "../../../shared/middlewares/auth.handler";
 import { RequestProperties, Roles } from "../../../shared/config/enumerates";
-import { createTicketSchema, getTicketSchema, getTicketsSchema, addItemSchema, updateTicketSchema, removeItemSchema, rateTicketSchema } from "../validators/Ticket.validators";
+import { createTicketSchema, getTicketSchema, getTicketsSchema, addItemSchema, updateTicketSchema, removeItemSchema, rateTicketSchema, createTicketInBulkSchema } from "../validators/Ticket.validators";
 
 
 
@@ -33,6 +33,13 @@ TicketRoutes.post(
     passport.authenticate('jwt', { session: false }),
     validatorHandler(createTicketSchema, RequestProperties.body),
     TicketController.create
+);
+
+TicketRoutes.post(
+    '/create-in-bulk',
+    passport.authenticate('jwt', { session: false }),
+    validatorHandler(createTicketInBulkSchema, RequestProperties.body),
+    TicketController.createInBulk
 );
 
 //? PUT

@@ -15,6 +15,7 @@ export interface TrainingData {
 export interface TrainingResult {
     message: string;
     examples: number;
+    trainingData: TrainingData[]
 }
 
 

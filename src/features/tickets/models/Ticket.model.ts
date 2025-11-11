@@ -145,7 +145,7 @@ class Ticket {
         if (agent) html = html.replace('{{agent}}', agent);
 
         const response = await SMTP.send({
-            from: `Whatever 😎" <${SMTP_USER}>`,
+            from: `MasteryTickets 😎" <${SMTP_USER}>`,
             to: email,
             subject: `${subject} | Tickets`,
             html
@@ -295,6 +295,17 @@ class Ticket {
 
         return ticket;
     };
+
+
+
+    public static createInBulk = async (data: Partial<TicketEntry>[]): Promise<PromiseSettledResult<ITicket>[]> => {
+        const promises = await Promise.allSettled(
+            data.map(ticket => this.create(ticket))
+        );
+
+        return promises;
+    };
+
 
     //? Update Ticket by Id
     public static update = async (

@@ -58,6 +58,9 @@ export const createTicketSchema = Joi.object({
 });
 
 
+export const createTicketInBulkSchema = ExtendedJoi.array().items(createTicketSchema);
+
+
 export const updateTicketSchema = Joi.object({
     title,
     description,

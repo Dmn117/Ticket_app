@@ -6,8 +6,11 @@ import Jwt from 'jsonwebtoken';
 import Ticket from "../../tickets/models/Ticket.model";
 import HelpTopic from "../../helpTopics/models/HelpTopic.model";
 
-import { CLASSIFIER_API_URL, JWT_PRIVATE_KEY } from "../../../shared/config/constants";
+import { CLASSIFIER_API_URL, JWT_PRIVATE_KEY, MONTHS_OF_TRAINING_DATA } from "../../../shared/config/constants";
 import { ClassificationResult, ErrorResponse, TrainingData, TrainingResult } from '../interfaces/Classifier.interfaces';
+import { FilterQuery } from "mongoose";
+import FetchResponse from "../../../shared/utils/lib/FetchResponse";
+import { TicketStatus } from "../../../shared/config/enumerates";
 
 
 
@@ -28,18 +31,10 @@ class Classifier {
         });
     };
 
-    private static throwBoomError = async (res: Response): Promise<void> => {
-        if (res.ok) return;
 
-        const error: ErrorResponse = await res.json();
-
-        throw boom.boomify(new Error(error.detail), { statusCode: res.status });
-    };
-
-
-    private static getTrainingData = async (): Promise<TrainingData[]> => {
-        const helptopics = await HelpTopic.getTrainingData({ enabled: true });
-        const tickets = await Ticket.getDataTraining({ status: 'Cerrado' });
+    private static getTrainingData = async (params: FilterQuery<Document> = {}): Promise<TrainingData[]> => {
+        const helptopics = await HelpTopic.getTrainingData({ ...params, enabled: true });
+        const tickets = await Ticket.getDataTraining({ ...params, status: { $nin: [TicketStatus.CANCELED] } });
 
         return [...helptopics, ...tickets];
     };
@@ -54,28 +49,42 @@ class Classifier {
             body: JSON.stringify({ description })
         });
 
-        await this.throwBoomError(res);
-
-        const result: ClassificationResult = await res.json();
-
-        return result;
+        return await FetchResponse.validate(res, `Error tratando de clasificar el entrada: ${description}`);
     };
 
 
-    public static train = async (): Promise<TrainingResult> => {
-        const trainingData: TrainingData[] = await this.getTrainingData();
-
+    public static train = async (trainingData: TrainingData[]): Promise<TrainingResult> => {
         const res: Response = await fetch(`${CLASSIFIER_API_URL}/train`, {
             method: 'POST',
             headers: this.headers(),
             body: JSON.stringify(trainingData)
         });
 
-        await this.throwBoomError(res);
+        return {
+            ...await FetchResponse.validate(res, 'Error entrenando el modelo desde Classifier'),
+            trainingData
+        };
+    };
 
-        const result: TrainingResult = await res.json();
 
-        return result;
+    public static automaticTrainingSync = async (): Promise<TrainingResult> => {
+        const monthsAgo = new Date();
+        
+        monthsAgo.setMonth(monthsAgo.getMonth() - MONTHS_OF_TRAINING_DATA);
+
+        const trainingData: TrainingData[] = await this.getTrainingData({ createdAt: { $gte: monthsAgo } });
+
+        return await this.train(trainingData);
+    };
+
+
+    public static automaticTraining = async (): Promise<void> => {
+        try {
+            this.automaticTrainingSync();
+        }
+        catch (error) {
+            console.log('Error entrenando el modelo', error);
+        }
     };
 }
 
